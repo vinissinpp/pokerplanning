@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PokerPlanning — Sala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --c1:#ff4242; --c1d:#cc2e2e; --c1l:#fff0f0;
+  --c2:#f4fad2; --c3:#d4ee5e; --c4:#e1edb9; --c5:#f0f2eb;
+  --heart:#2a7a4a;
+  --text:#1a1a1a; --textm:#555; --texts:#888;
+  --white:#fff; --radius:14px; --radius-sm:9px;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text); min-height:100vh; }
+
+/* ══ LOGIN ══ */
+#tela-login{ min-height:100vh; display:none; align-items:center; justify-content:center; background:var(--c5); }
+#tela-login.ativa{ display:flex; }
+.login-card{ background:var(--white); border:1px solid var(--c4); border-radius:var(--radius); padding:2.5rem; width:100%; max-width:390px; margin:1rem; animation:fadeUp .35s ease both; box-shadow:0 8px 32px rgba(0,0,0,.08); }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
+.logo{ font-family:'Syne',sans-serif; font-weight:800; font-size:17px; display:flex; align-items:center; gap:7px; margin-bottom:1.5rem; }
+.logo-dot{ width:9px; height:9px; border-radius:50%; background:var(--c1); }
+.login-card h2{ font-family:'Syne',sans-serif; font-size:22px; font-weight:700; margin-bottom:4px; }
+.login-card > p{ font-size:13px; color:var(--textm); margin-bottom:1.5rem; line-height:1.6; }
+.field{ margin-bottom:1rem; }
+.field label{ display:block; font-size:11px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+.field input{ width:100%; padding:10px 14px; border:1.5px solid var(--c4); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--c5); outline:none; transition:border-color .15s, background .15s, box-shadow .15s; }
+.field input:focus{ border-color:var(--c1); background:var(--white); box-shadow:0 0 0 3px rgba(255,66,66,.08); }
+.erro-msg{ font-size:12px; color:var(--c1); min-height:16px; margin-top:6px; }
+.btn-p{ background:var(--c1); color:#fff; border:none; width:100%; padding:12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all .15s; margin-top:4px; box-shadow:0 4px 14px rgba(255,66,66,.25); }
+.btn-p:hover{ background:var(--c1d); transform:translateY(-1px); box-shadow:0 6px 20px rgba(255,66,66,.3); }
+.btn-s{ background:var(--c5); color:var(--textm); border:1.5px solid var(--c4); padding:7px 14px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; text-decoration:none; display:inline-block; }
+.btn-s:hover{ background:var(--c4); color:var(--text); }
+
+/* ══ SALA ══ */
+#tela-sala{ display:none; flex-direction:column; min-height:100vh; }
+#tela-sala.ativa{ display:flex; }
+
+/* ── NAV ── */
+nav{ display:flex; align-items:center; justify-content:space-between; padding:.875rem 2rem; background:var(--white); border-bottom:1px solid var(--c4); position:sticky; top:0; z-index:50; gap:10px; }
+.nav-logo{ font-family:'Syne',sans-serif; font-weight:800; font-size:17px; display:flex; align-items:center; gap:7px; text-decoration:none; color:var(--text); }
+.nav-sala{ font-size:13px; color:var(--textm); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nav-badge{ font-size:11px; background:var(--c3); color:#2a3a00; padding:3px 10px; border-radius:20px; font-weight:600; }
+.nav-dir{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.votos-rest{ font-size:11px; color:var(--textm); background:var(--c5); border:1px solid var(--c4); padding:3px 10px; border-radius:20px; }
+.votos-rest.alerta{ background:#fff3f3; border-color:#ffb3b3; color:var(--c1); }
+.btn-nav-icon{ background:none; border:1px solid var(--c4); padding:6px 12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; color:var(--textm); transition:all .15s; display:inline-flex; align-items:center; gap:5px; }
+.btn-nav-icon:hover{ background:var(--c4); color:var(--text); }
+
+/* ── LAYOUT SALA ── */
+.sala-body{ display:grid; grid-template-columns:1fr 300px; gap:14px; padding:1.25rem 2rem; flex:1; align-items:start; }
+.main{ display:flex; flex-direction:column; gap:14px; }
+.card{ background:var(--white); border:1px solid var(--c4); border-radius:var(--radius); padding:1.1rem 1.25rem; }
+.sec-label{ font-size:10px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+
+/* ── TAREFA ATIVA ── */
+.tarefa-ativa-wrap{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.tarefa-nome{ font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:3px; }
+.tarefa-desc{ font-size:12px; color:var(--textm); line-height:1.5; }
+.tarefa-resp{ font-size:11px; color:var(--texts); margin-top:4px; display:flex; align-items:center; gap:4px; }
+.tarefa-vazia{ font-size:13px; color:var(--texts); font-style:italic; }
+
+.votos-area{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.voto-item{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+.voto-nome{ font-size:9px; color:var(--texts); text-align:center; max-width:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.av{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
+.carta-v{ width:32px; height:44px; border-radius:6px; border:1px solid var(--c4); background:var(--c5); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--text); font-family:'Syne',sans-serif; transition:all .25s; }
+.carta-oculta{ background:var(--c1); border-color:var(--c1d); color:#fff; }
+.carta-pendente{ background:var(--c5); color:var(--texts); font-size:10px; }
+
+.acoes{ display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; align-items:center; }
+.btn-sm{ background:var(--c3); color:#2a3a00; border:none; padding:6px 12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; }
+.btn-sm:hover{ background:#c0dc3e; transform:translateY(-1px); }
+
+.media-box{ display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--c4); }
+.media-box.visivel{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.media-num{ font-family:'Syne',sans-serif; font-size:34px; font-weight:800; color:var(--c1); }
+.media-label{ font-size:10px; color:var(--texts); margin-bottom:2px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+.sp-row{ display:flex; gap:6px; align-items:center; }
+.sp-row select{ padding:7px 10px; border:1.5px solid var(--c4); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); background:var(--c5); cursor:pointer; }
+.sp-row select:focus{ border-color:var(--c1); outline:none; }
+
+/* ══ CARTAS 5:7 ══ */
+.cartas-wrapper{
+  display:flex; flex-direction:row; justify-content:center; align-items:flex-end;
+  gap:10px; width:100%; padding:8px 0 14px; flex-wrap:wrap;
+}
+.carta-btn{
+  width:72px; height:101px; flex-shrink:0; border-radius:11px;
+  border:1.5px solid #ccd9a0; background:var(--white);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; position:relative; overflow:hidden;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 2px 7px rgba(0,0,0,.07);
+}
+.carta-btn:hover:not(:disabled){ border-color:var(--c1); transform:translateY(-11px) scale(1.05); box-shadow:0 12px 28px rgba(255,66,66,.18); z-index:2; }
+.carta-btn.ativa{ border:2px solid var(--c1); background:var(--c2); transform:translateY(-15px) scale(1.07); box-shadow:0 16px 34px rgba(255,66,66,.22); z-index:3; }
+.carta-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none !important; box-shadow:none; }
+.carta-valor{ font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--text); line-height:1; position:relative; z-index:1; }
+.carta-btn.ativa .carta-valor, .carta-btn:hover:not(:disabled) .carta-valor{ color:var(--c1); }
+.carta-naipe{ position:absolute; width:11px; height:11px; opacity:.5; }
+.carta-naipe.tl{ top:6px; left:6px; }
+.carta-naipe.br{ bottom:6px; right:6px; transform:rotate(180deg); }
+.carta-btn.ativa .carta-naipe, .carta-btn:hover:not(:disabled) .carta-naipe{ opacity:1; }
+.carta-heart-bg{ position:absolute; width:36px; height:36px; opacity:.07; pointer-events:none; }
+.carta-btn.ativa .carta-heart-bg, .carta-btn:hover:not(:disabled) .carta-heart-bg{ opacity:.22; }
+.carta-btn.especial .carta-valor{ font-size:26px; color:var(--textm); }
+.carta-btn.especial:hover:not(:disabled) .carta-valor, .carta-btn.especial.ativa .carta-valor{ color:var(--c1); }
+
+/* ══ SEÇÃO MÉTRICAS INTEGRADA ══ */
+.metricas-section { border-top:2px solid var(--c4); margin-top:8px; padding-top:16px; }
+.metricas-section-header {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; cursor:pointer;
+}
+.metricas-section-header h3 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.sec-badge{ font-size:10px; background:var(--c3); color:#2a3a00; padding:2px 9px; border-radius:10px; font-weight:600; }
+.toggle-metricas{ background:none; border:1px solid var(--c4); border-radius:var(--radius-sm); padding:4px 10px; font-size:12px; color:var(--textm); cursor:pointer; transition:all .15s; }
+.toggle-metricas:hover{ background:var(--c4); }
+
+.metricas-resumo-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+.mr-card{ background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:.9rem 1rem; text-align:center; }
+.mr-label{ font-size:10px; color:var(--texts); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; font-weight:600; }
+.mr-valor{ font-family:'Syne',sans-serif; font-size:26px; font-weight:800; color:var(--text); }
+.mr-valor.destaque{ color:var(--c1); }
+.mr-sub{ font-size:11px; color:var(--textm); margin-top:2px; }
+
+/* Colaboradores inline */
+.colab-lista-inline{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.colab-item-inline{
+  background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius-sm);
+  padding:.75rem 1rem; display:flex; align-items:center; gap:12px;
+}
+.ci-av{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+.ci-info{ flex:1; min-width:0; }
+.ci-nome{ font-size:13px; font-weight:500; }
+.ci-detail{ font-size:11px; color:var(--textm); }
+.ci-barra-bg{ height:5px; background:var(--c4); border-radius:3px; overflow:hidden; margin-top:4px; }
+.ci-barra{ height:100%; background:var(--c3); border-radius:3px; transition:width .6s ease; }
+.ci-barra.top{ background:var(--c1); }
+.ci-pts{ font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--c1); }
+.ci-pts-label{ font-size:9px; color:var(--texts); text-align:right; }
+
+/* Histórico inline */
+.hist-lista-inline{ display:flex; flex-direction:column; gap:8px; }
+.hi-item{ background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:.75rem 1rem; }
+.hi-header{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.hi-nome{ font-size:13px; font-weight:500; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hi-pts{ font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--c1); background:var(--c2); padding:2px 10px; border-radius:14px; white-space:nowrap; }
+.hi-votos{ display:flex; gap:5px; flex-wrap:wrap; }
+.voto-chip{ display:flex; align-items:center; gap:4px; background:var(--white); border:1px solid var(--c4); border-radius:5px; padding:2px 7px; font-size:11px; }
+.voto-chip-val{ font-family:'Syne',sans-serif; font-weight:800; font-size:12px; color:var(--c1); }
+.hi-meta{ font-size:10px; color:var(--texts); margin-top:4px; }
+.vazio-met{ font-size:12px; color:var(--texts); font-style:italic; padding:.5rem 0; }
+
+/* Tarefas status inline */
+.tarefas-status{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.ts-item{ background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:.7rem .9rem; display:flex; align-items:center; gap:8px; }
+.ts-item.ok{ border-color:var(--c3); background:var(--c2); }
+.ts-dot{ width:8px; height:8px; border-radius:50%; background:var(--c4); flex-shrink:0; }
+.ts-dot.ok{ background:var(--c3); border:1px solid #aad020; }
+.ts-nome{ font-size:12px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ts-pts{ font-size:11px; background:var(--c3); color:#2a3a00; padding:2px 7px; border-radius:8px; white-space:nowrap; font-weight:600; }
+.ts-pts.pend{ background:var(--c4); color:var(--texts); }
+
+/* Metricas collapsed */
+.metricas-body{ overflow:hidden; transition:max-height .4s ease, opacity .3s ease; max-height:3000px; opacity:1; }
+.metricas-body.collapsed{ max-height:0; opacity:0; }
+
+/* ── SIDEBAR ── */
+.sidebar{ display:flex; flex-direction:column; gap:14px; }
+.part-lista{ display:flex; flex-direction:column; }
+.part-item{ display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--c4); }
+.part-item:last-child{ border-bottom:none; }
+.part-nome{ font-size:13px; flex:1; }
+.badge-s{ font-size:10px; padding:2px 8px; border-radius:10px; background:var(--c3); color:#2a3a00; font-weight:600; }
+.badge-ag{ background:var(--c5); color:var(--texts); border:1px solid var(--c4); }
+.sb-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.sb-acoes{ display:flex; gap:5px; }
+.btn-upload{ background:var(--c5); color:var(--textm); border:1.5px dashed #bbc890; padding:5px 10px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:500; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:4px; }
+.btn-upload:hover{ background:var(--c4); border-color:#aad020; color:#2a3a00; }
+.tarefa-item{ display:flex; align-items:center; gap:7px; padding:8px 9px; border-radius:var(--radius-sm); border:1px solid var(--c4); cursor:pointer; font-size:12px; color:var(--text); background:var(--white); margin-bottom:4px; transition:all .1s; }
+.tarefa-item:hover{ background:var(--c5); }
+.tarefa-item.ativa-t{ border-color:var(--c1); background:var(--c2); color:var(--c1d); }
+.tarefa-pt{ font-size:10px; font-weight:600; padding:2px 7px; border-radius:8px; margin-left:auto; background:var(--c3); color:#2a3a00; white-space:nowrap; flex-shrink:0; }
+.tarefa-pt.pend{ background:var(--c5); color:var(--texts); }
+.dot{ width:7px; height:7px; border-radius:50%; background:var(--c4); flex-shrink:0; }
+.dot.ok{ background:var(--c3); border:1px solid #aad020; }
+.dot.cur{ background:var(--c1); }
+.btn-icon{ background:none; border:none; cursor:pointer; padding:4px 6px; border-radius:6px; color:var(--texts); font-size:14px; transition:all .15s; display:inline-flex; align-items:center; }
+.btn-icon:hover{ background:var(--c4); color:var(--text); }
+
+/* ── MODAIS ── */
+.overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.3); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+.overlay.ativo{ display:flex; }
+.modal{ background:var(--white); border-radius:var(--radius); padding:2rem; width:100%; max-width:440px; margin:1rem; animation:fadeUp .22s ease both; box-shadow:0 20px 60px rgba(0,0,0,.15); }
+.modal h3{ font-family:'Syne',sans-serif; font-size:18px; font-weight:800; margin-bottom:1rem; }
+.modal-btns{ display:flex; gap:8px; margin-top:1.25rem; }
+.upload-area{ border:2px dashed var(--c4); border-radius:var(--radius-sm); padding:1.75rem; text-align:center; cursor:pointer; transition:all .2s; background:var(--c5); margin-bottom:1rem; }
+.upload-area:hover,.upload-area.drag{ border-color:var(--c1); background:var(--c2); }
+.upload-area p{ font-size:13px; color:var(--textm); margin-top:6px; }
+.upload-area span{ font-size:11px; color:var(--texts); }
+#input-arquivo{ display:none; }
+.preview-box{ display:none; max-height:180px; overflow-y:auto; border:1px solid var(--c4); border-radius:var(--radius-sm); margin-bottom:1rem; }
+.preview-box.visivel{ display:block; }
+.preview-header{ padding:7px 12px; background:var(--c5); border-bottom:1px solid var(--c4); font-size:10px; font-weight:600; color:var(--texts); text-transform:uppercase; display:flex; align-items:center; justify-content:space-between; }
+.preview-count{ background:var(--c3); color:#2a3a00; padding:1px 8px; border-radius:8px; font-size:10px; font-weight:600; }
+.preview-item{ padding:7px 12px; border-bottom:1px solid var(--c4); font-size:12px; display:flex; align-items:center; gap:8px; }
+.preview-item:last-child{ border-bottom:none; }
+.modelo-hint{ background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:9px 12px; font-size:12px; color:#2a3a00; margin-bottom:1rem; display:flex; gap:8px; }
+.toast{ position:fixed; bottom:1.5rem; right:1.5rem; background:var(--text); color:#fff; font-size:13px; padding:10px 18px; border-radius:var(--radius-sm); opacity:0; transition:opacity .2s; z-index:300; pointer-events:none; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+.toast.show{ opacity:1; }
+.toast.erro{ background:var(--c1); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){ .sala-body{ grid-template-columns:1fr 260px; } }
+@media(max-width:700px){
+  .sala-body{ grid-template-columns:1fr; padding:1rem; }
+  .sidebar{ order:-1; }
+  nav{ padding:.875rem 1rem; }
+  .carta-btn{ width:54px; height:76px; }
+  .carta-valor{ font-size:17px; }
+  .metricas-resumo-grid{ grid-template-columns:repeat(2,1fr); }
+  .tarefas-status{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="tela-login" class="ativa">
+  <div class="login-card">
+    <div class="logo"><span class="logo-dot"></span>PokerPlanning</div>
+    <h2 id="login-titulo">Entrar na sala</h2>
+    <p id="login-sub">Informe seu nome para participar da votação.</p>
+    <div class="field"><label>Seu nome</label><input type="text" id="input-nome" placeholder="Ex: Ana Lima" maxlength="30"/></div>
+    <div id="campo-codigo-wrap" class="field"><label>Código da sala</label><input type="text" id="input-codigo" placeholder="Ex: abc-123-xyz" maxlength="200"/></div>
+    <div class="erro-msg" id="login-erro"></div>
+    <button class="btn-p" onclick="entrarSala()">Entrar na sala →</button>
+    <div style="text-align:center;margin-top:14px;">
+      <a href="/" style="font-size:13px;color:var(--c1);">← Voltar ao início</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SALA ══ -->
+<div id="tela-sala">
+  <nav>
+    <a class="nav-logo" href="/"><span class="logo-dot"></span>PokerPlanning</a>
+    <div class="nav-sala" id="nav-sala-nome">—</div>
+    <div class="nav-dir">
+      <span class="votos-rest" id="votos-rest" style="display:none"></span>
+      <span class="nav-badge" id="nav-badge">0 online</span>
+      <button class="btn-nav-icon" onclick="copiarLink()">🔗 Copiar link</button>
+    </div>
+  </nav>
+
+  <div class="sala-body">
+    <!-- ══ COLUNA PRINCIPAL ══ -->
+    <div class="main">
+
+      <!-- Tarefa ativa + votos -->
+      <div class="card">
+        <div class="sec-label">Tarefa ativa</div>
+        <div class="tarefa-ativa-wrap">
+          <div id="tarefa-info" style="flex:1"><div class="tarefa-vazia">Nenhuma tarefa selecionada.</div></div>
+          <button class="btn-icon" id="btn-editar-tarefa" onclick="abrirModalEditar()" style="display:none" title="Editar tarefa">✏️</button>
+        </div>
+        <div class="votos-area" id="votos-area"></div>
+        <div class="acoes">
+          <button class="btn-p" id="btn-revelar" onclick="revelar()" style="padding:8px 18px;font-size:13px;width:auto;">Revelar votos</button>
+          <button class="btn-s" onclick="resetar()" style="font-size:13px;">Resetar</button>
+        </div>
+        <div class="media-box" id="media-box">
+          <div>
+            <div class="media-label">Média dos votos</div>
+            <div class="media-num" id="media-val">—</div>
+          </div>
+          <div>
+            <div class="media-label">Story points finais</div>
+            <div class="sp-row">
+              <select id="sp-select"><option>1</option><option>2</option><option>3</option><option>5</option><option>8</option><option>13</option><option>21</option></select>
+              <button class="btn-sm" onclick="salvarResultado()">Salvar ✓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cartas -->
+      <div class="card">
+        <div class="sec-label">Suas cartas — clique para votar</div>
+        <div class="cartas-wrapper" id="cartas-wrapper"></div>
+      </div>
+
+      <!-- ══ MÉTRICAS INTEGRADAS ══ -->
+      <div class="card" id="card-metricas">
+        <div class="metricas-section">
+          <div class="metricas-section-header" onclick="toggleMetricas()">
+            <h3>
+              📊 Métricas da Sprint
+              <span class="sec-badge" id="met-badge-hist">0</span>
+            </h3>
+            <button class="toggle-metricas" id="btn-toggle-met">▾ Recolher</button>
+          </div>
+
+          <div class="metricas-body" id="metricas-body">
+            <!-- Resumo numérico -->
+            <div class="metricas-resumo-grid">
+              <div class="mr-card">
+                <div class="mr-label">Total sprint</div>
+                <div class="mr-valor destaque" id="met-total">0</div>
+                <div class="mr-sub">story points</div>
+              </div>
+              <div class="mr-card">
+                <div class="mr-label">Concluídas</div>
+                <div class="mr-valor" id="met-concluidas">0</div>
+                <div class="mr-sub" id="met-concluidas-sub">de 0 tarefas</div>
+              </div>
+              <div class="mr-card">
+                <div class="mr-label">Média / tarefa</div>
+                <div class="mr-valor" id="met-media">0</div>
+                <div class="mr-sub">story points</div>
+              </div>
+              <div class="mr-card">
+                <div class="mr-label">Colaboradores</div>
+                <div class="mr-valor" id="met-colab">0</div>
+                <div class="mr-sub">ativos</div>
+              </div>
+            </div>
+
+            <!-- Pontos por colaborador -->
+            <div class="sec-label" style="margin-bottom:10px;">Pontos por colaborador</div>
+            <div class="colab-lista-inline" id="met-colab-lista">
+              <div class="vazio-met">Nenhuma tarefa concluída ainda.</div>
+            </div>
+
+            <!-- Histórico de votações -->
+            <div class="sec-label" style="margin-bottom:10px;margin-top:8px;">Histórico de votações</div>
+            <div class="hist-lista-inline" id="met-historico">
+              <div class="vazio-met">Nenhuma votação registrada ainda.</div>
+            </div>
+
+            <!-- Todas as tarefas -->
+            <div class="sec-label" style="margin-bottom:10px;margin-top:14px;">Todas as tarefas</div>
+            <div class="tarefas-status" id="met-tarefas-grid">
+              <div class="vazio-met">Nenhuma tarefa cadastrada.</div>
+            </div>
+
+          </div><!-- /metricas-body -->
+        </div>
+      </div>
+
+    </div><!-- /main -->
+
+    <!-- ══ SIDEBAR ══ -->
+    <div class="sidebar">
+      <div class="card">
+        <div class="sec-label">Participantes</div>
+        <div class="part-lista" id="lista-participantes"></div>
+      </div>
+      <div class="card">
+        <div class="sb-header">
+          <div class="sec-label" style="margin:0">Tarefas</div>
+          <div class="sb-acoes">
+            <button class="btn-sm" style="font-size:11px;padding:4px 9px;" onclick="abrirModalTarefa()">+ Novo</button>
+            <button class="btn-upload" onclick="abrirModalUpload()">📋 Importar</button>
+          </div>
+        </div>
+        <div id="lista-tarefas"><div style="font-size:12px;color:var(--texts);font-style:italic;">Nenhuma tarefa ainda.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAIS ══ -->
+<!-- Nova tarefa -->
+<div class="overlay" id="modal-tarefa">
+  <div class="modal">
+    <h3>Nova tarefa</h3>
+    <div class="field"><label>Nome *</label><input type="text" id="t-nome" placeholder="Ex: Criar tela de login" maxlength="80"/></div>
+    <div class="field"><label>Descrição (opcional)</label><input type="text" id="t-desc" placeholder="Breve descrição" maxlength="200"/></div>
+    <div class="field"><label>Responsável (opcional)</label><input type="text" id="t-resp" placeholder="Ex: Ana Lima" maxlength="40"/></div>
+    <div class="modal-btns">
+      <button class="btn-s" onclick="fecharModals()">Cancelar</button>
+      <button class="btn-p" style="width:auto;padding:10px 20px;" onclick="adicionarTarefa()">Adicionar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editar tarefa -->
+<div class="overlay" id="modal-editar">
+  <div class="modal">
+    <h3>Editar tarefa</h3>
+    <div class="field"><label>Nome *</label><input type="text" id="e-nome" maxlength="80"/></div>
+    <div class="field"><label>Descrição</label><input type="text" id="e-desc" maxlength="200"/></div>
+    <div class="field"><label>Responsável</label><input type="text" id="e-resp" maxlength="40"/></div>
+    <div class="modal-btns">
+      <button class="btn-s" onclick="fecharModals()">Cancelar</button>
+      <button class="btn-p" style="width:auto;padding:10px 20px;" onclick="salvarEdicao()">Salvar ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload planilha -->
+<div class="overlay" id="modal-upload">
+  <div class="modal" style="max-width:500px;">
+    <h3>Importar planilha</h3>
+    <div class="modelo-hint"><span>💡</span><div>Colunas: <strong>nome</strong> (obrigatório), <strong>descricao</strong> e <strong>responsavel</strong> (opcionais). Aceita <strong>.csv</strong> e <strong>.xlsx</strong>.</div></div>
+    <div class="upload-area" id="upload-area" onclick="document.getElementById('input-arquivo').click()">
+      <div style="font-size:28px;">📂</div>
+      <p>Clique para selecionar ou arraste o arquivo aqui</p>
+      <span>CSV ou XLSX</span>
+    </div>
+    <input type="file" id="input-arquivo" accept=".csv,.xlsx,.xls" onchange="processarArquivo(this.files[0])"/>
+    <div class="preview-box" id="preview-box">
+      <div class="preview-header"><span>Tarefas encontradas</span><span class="preview-count" id="preview-count">0</span></div>
+      <div id="preview-lista"></div>
+    </div>
+    <div class="erro-msg" id="upload-erro"></div>
+    <div class="modal-btns">
+      <button class="btn-s" onclick="fecharModals()">Cancelar</button>
+      <button class="btn-p" style="width:auto;padding:10px 20px;" id="btn-importar" onclick="importarTarefas()" disabled>Importar tarefas</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CONSTANTES ══
+const SEQ    = [1,2,3,5,8,13,21,'?'];
+const CORES  = ['#d4ee5e','#e1edb9','#ff4242','#f4fad2','#e8d5f5','#d5edf5','#ffe0b2','#b2dfdb'];
+const CORES_T= ['#2a3a00','#2a3a00','#ffffff','#444','#6b2fa0','#1a6a7a','#7a3800','#00695c'];
+const avatarIdx={};
+function av(id){ if(avatarIdx[id]===undefined) avatarIdx[id]=Object.keys(avatarIdx).length%CORES.length; return avatarIdx[id]; }
+const H = (cls) => `<svg class="${cls}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#2a7a4a"/></svg>`;
+
+let socket, meuNome, minhaSalaId, meuId;
+let estado=null, votei=null, tarefasImport=[];
+let metricasExpanded = true;
+
+// ══ INIT ══
+window.onload = () => {
+  const parts = location.pathname.split('/');
+  minhaSalaId = parts[2] || new URLSearchParams(location.search).get('sala') || '';
+  // Pega nome da URL se passado pela index
+  const nomeUrl = new URLSearchParams(location.search).get('nome');
+  if (nomeUrl) document.getElementById('input-nome').value = nomeUrl;
+  if (minhaSalaId) {
+    document.getElementById('campo-codigo-wrap').style.display = 'none';
+    document.getElementById('login-sub').textContent = 'Você foi convidado! Informe seu nome para entrar.';
+    if (nomeUrl) { meuNome = nomeUrl; conectar(); return; }
+  }
+  ['input-nome','input-codigo'].forEach(id =>
+    document.getElementById(id).addEventListener('keydown', e => e.key === 'Enter' && entrarSala())
+  );
+  setupUpload();
+};
+
+// ══ LOGIN / CONEXÃO ══
+function entrarSala() {
+  const nome = document.getElementById('input-nome').value.trim();
+  const cod  = document.getElementById('input-codigo').value.trim();
+  const sid  = minhaSalaId || cod;
+  if (!nome) { document.getElementById('login-erro').textContent = 'Informe seu nome.'; return; }
+  if (!sid)  { document.getElementById('login-erro').textContent = 'Informe o código da sala.'; return; }
+  meuNome = nome; minhaSalaId = sid; conectar();
+}
+
+function conectar() {
+  socket = io(); meuId = null;
+  socket.on('connect', () => { meuId = socket.id; socket.emit('entrar', { salaId: minhaSalaId, nome: meuNome }); });
+  socket.on('erro', ({ msg }) => document.getElementById('login-erro').textContent = msg);
+  socket.on('estado', s => {
+    estado = s;
+    if (document.getElementById('tela-login').classList.contains('ativa')) {
+      document.getElementById('tela-login').classList.remove('ativa');
+      document.getElementById('tela-sala').classList.add('ativa');
+    }
+    renderSala();
+    renderMetricas();
+  });
+  socket.on('revelado', ({ votos, media }) => {
+    document.getElementById('media-val').textContent = media !== null ? media.toFixed(1) : '—';
+    document.getElementById('media-box').classList.add('visivel');
+    if (media) {
+      const c = [1,2,3,5,8,13,21].reduce((a,b) => Math.abs(b-media) < Math.abs(a-media) ? b : a);
+      document.getElementById('sp-select').value = c;
+    }
+  });
+  socket.on('limiteIp', ({ restantes, limite }) => {
+    const el = document.getElementById('votos-rest');
+    el.style.display = 'inline-block';
+    el.textContent = `${restantes}/${limite} votos hoje`;
+    el.className = 'votos-rest' + (restantes <= 3 ? ' alerta' : '');
+  });
+  socket.on('erroVoto', ({ msg }) => toast(msg, true));
+  socket.on('disconnect', () => toast('Conexão perdida. Reconectando...'));
+}
+
+// ══ RENDER SALA ══
+function renderSala() {
+  if (!estado) return;
+  const { participantes, tarefas, tarefaAtiva, votos, revelado } = estado;
+
+  document.getElementById('nav-sala-nome').textContent = estado.nome || `Sala ${minhaSalaId}`;
+  document.getElementById('nav-badge').textContent = `${participantes.length} online`;
+
+  // Tarefa ativa
+  const t = tarefas.find(x => x.id === tarefaAtiva);
+  const infoEl = document.getElementById('tarefa-info');
+  const btnEd = document.getElementById('btn-editar-tarefa');
+  if (t) {
+    infoEl.innerHTML = `
+      <div class="tarefa-nome">${esc(t.nome)}</div>
+      ${t.descricao ? `<div class="tarefa-desc">${esc(t.descricao)}</div>` : ''}
+      ${t.responsavel ? `<div class="tarefa-resp">👤 ${esc(t.responsavel)}</div>` : ''}`;
+    btnEd.style.display = 'inline-flex';
+  } else {
+    infoEl.innerHTML = '<div class="tarefa-vazia">Nenhuma tarefa selecionada.</div>';
+    btnEd.style.display = 'none';
+  }
+
+  // Área de votos
+  document.getElementById('votos-area').innerHTML = participantes.map(p => {
+    const v = votos[p.id], idx = av(p.id);
+    const ini = p.nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    let cls = 'carta-v', txt = '—';
+    if (v === '?')                          { cls += ' carta-oculta'; txt = '?'; }
+    else if (v !== null && v !== undefined) { cls += revelado ? '' : ' carta-oculta'; txt = revelado ? v : '✓'; }
+    else                                    { cls += ' carta-pendente'; }
+    return `<div class="voto-item">
+      <div class="av" style="background:${CORES[idx]};color:${CORES_T[idx]}">${ini}</div>
+      <div class="${cls}">${txt}</div>
+      <div class="voto-nome">${esc(p.nome)}</div>
+    </div>`;
+  }).join('');
+
+  const br = document.getElementById('btn-revelar');
+  br.disabled = revelado; br.style.opacity = revelado ? '.5' : '1';
+  if (!revelado) document.getElementById('media-box').classList.remove('visivel');
+
+  // Cartas
+  const disabled = !tarefaAtiva || revelado;
+  document.getElementById('cartas-wrapper').innerHTML = SEQ.map((v, i) => {
+    const ativo = votei === i && !revelado;
+    const esp = v === '?';
+    return `<button class="carta-btn${ativo ? ' ativa' : ''}${esp ? ' especial' : ''}" onclick="votar(${i})" ${disabled ? 'disabled' : ''}>
+      ${H('carta-naipe tl')}
+      ${H('carta-heart-bg')}
+      <span class="carta-valor">${v}</span>
+      ${H('carta-naipe br')}
+    </button>`;
+  }).join('');
+
+  // Participantes
+  document.getElementById('lista-participantes').innerHTML = participantes.map(p => {
+    const votou = votos[p.id] !== null && votos[p.id] !== undefined;
+    const idx = av(p.id);
+    const ini = p.nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="part-item">
+      <div class="av" style="width:26px;height:26px;font-size:9px;background:${CORES[idx]};color:${CORES_T[idx]}">${ini}</div>
+      <span class="part-nome">${esc(p.nome)}${p.id === meuId ? ' <span style="color:var(--texts);font-size:10px;">(você)</span>' : ''}</span>
+      <span class="badge-s ${votou ? '' : 'badge-ag'}">${votou ? 'votou' : 'aguard.'}</span>
+    </div>`;
+  }).join('');
+
+  // Lista tarefas sidebar
+  const lt = document.getElementById('lista-tarefas');
+  if (!tarefas.length) { lt.innerHTML = '<div style="font-size:12px;color:var(--texts);font-style:italic;">Nenhuma tarefa ainda.</div>'; return; }
+  lt.innerHTML = tarefas.map(t => `
+    <div class="tarefa-item${t.id === tarefaAtiva ? ' ativa-t' : ''}" onclick="selTarefa('${t.id}')">
+      <div class="dot${t.pontos !== null ? ' ok' : (t.id === tarefaAtiva ? ' cur' : '')}"></div>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.nome)}</span>
+      <span class="tarefa-pt${t.pontos === null ? ' pend' : ''}">${t.pontos !== null ? t.pontos + ' pts' : '—'}</span>
+    </div>`).join('');
+}
+
+// ══ RENDER MÉTRICAS ══
+function renderMetricas() {
+  if (!estado) return;
+  const { tarefas, historico } = estado;
+
+  // Calcular métricas localmente
+  const porColab = {};
+  let totalSprint = 0, totalConcluidas = 0;
+  tarefas.forEach(t => {
+    if (t.pontos !== null) {
+      totalSprint += t.pontos; totalConcluidas++;
+      const resp = t.responsavel || 'Sem responsável';
+      if (!porColab[resp]) porColab[resp] = { nome: resp, pontos: 0, tarefas: 0 };
+      porColab[resp].pontos += t.pontos;
+      porColab[resp].tarefas += 1;
+    }
+  });
+  const colaboradores = Object.values(porColab).sort((a,b) => b.pontos - a.pontos);
+  const media = totalConcluidas > 0 ? Math.round((totalSprint / totalConcluidas) * 10) / 10 : 0;
+
+  // Cards resumo
+  document.getElementById('met-total').textContent = totalSprint;
+  document.getElementById('met-concluidas').textContent = totalConcluidas;
+  document.getElementById('met-concluidas-sub').textContent = `de ${tarefas.length} tarefas`;
+  document.getElementById('met-media').textContent = media;
+  document.getElementById('met-colab').textContent = colaboradores.length;
+  document.getElementById('met-badge-hist').textContent = historico ? historico.length : 0;
+
+  // Colaboradores
+  const maxPts = colaboradores[0]?.pontos || 1;
+  const colabEl = document.getElementById('met-colab-lista');
+  if (!colaboradores.length) {
+    colabEl.innerHTML = '<div class="vazio-met">Nenhuma tarefa concluída ainda.</div>';
+  } else {
+    colabEl.innerHTML = colaboradores.map((c, i) => {
+      const pct = Math.round((c.pontos / maxPts) * 100);
+      const ini = c.nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+      return `<div class="colab-item-inline">
+        <div class="ci-av" style="background:${CORES[i%CORES.length]};color:${CORES_T[i%CORES_T.length]}">${ini}</div>
+        <div class="ci-info">
+          <div class="ci-nome">${esc(c.nome)}</div>
+          <div class="ci-detail">${c.tarefas} tarefa${c.tarefas !== 1 ? 's' : ''}</div>
+          <div class="ci-barra-bg"><div class="ci-barra${i===0?' top':''}" style="width:${pct}%"></div></div>
+        </div>
+        <div><div class="ci-pts">${c.pontos}</div><div class="ci-pts-label">pts</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Histórico
+  const histArr = historico ? [...historico].reverse() : [];
+  const histEl = document.getElementById('met-historico');
+  if (!histArr.length) {
+    histEl.innerHTML = '<div class="vazio-met">Nenhuma votação registrada ainda.</div>';
+  } else {
+    histEl.innerHTML = histArr.map(h => {
+      const votosHtml = Object.entries(h.votos).map(([nome, val]) =>
+        `<div class="voto-chip"><span>${esc(nome)}</span><span class="voto-chip-val">${val}</span></div>`
+      ).join('');
+      const hora = new Date(h.timestamp).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+      return `<div class="hi-item">
+        <div class="hi-header">
+          <div class="hi-nome">${esc(h.tarefaNome)}</div>
+          <div class="hi-pts">${h.pontos} pts</div>
+        </div>
+        ${h.responsavel ? `<div style="font-size:11px;color:var(--textm);margin-bottom:5px;">👤 ${esc(h.responsavel)}</div>` : ''}
+        <div class="hi-votos">${votosHtml || '<span style="font-size:11px;color:var(--texts)">Sem votos</span>'}</div>
+        ${h.media !== null ? `<div class="hi-meta">Média: ${h.media} pts · ${hora}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Todas as tarefas
+  const tEl = document.getElementById('met-tarefas-grid');
+  if (!tarefas.length) {
+    tEl.innerHTML = '<div class="vazio-met">Nenhuma tarefa cadastrada.</div>';
+  } else {
+    tEl.innerHTML = tarefas.map(t => `
+      <div class="ts-item${t.pontos !== null ? ' ok' : ''}">
+        <div class="ts-dot${t.pontos !== null ? ' ok' : ''}"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="ts-nome">${esc(t.nome)}</div>
+          ${t.responsavel ? `<div style="font-size:10px;color:var(--textm)">${esc(t.responsavel)}</div>` : ''}
+        </div>
+        <span class="ts-pts${t.pontos === null ? ' pend' : ''}">${t.pontos !== null ? t.pontos + ' pts' : '—'}</span>
+      </div>`).join('');
+  }
+}
+
+function toggleMetricas() {
+  metricasExpanded = !metricasExpanded;
+  document.getElementById('metricas-body').classList.toggle('collapsed', !metricasExpanded);
+  document.getElementById('btn-toggle-met').textContent = metricasExpanded ? '▾ Recolher' : '▸ Expandir';
+}
+
+// ══ AÇÕES SALA ══
+function votar(i) { if (!estado?.tarefaAtiva) return; votei = i; socket.emit('votar', { valor: SEQ[i] }); }
+function revelar() { socket.emit('revelar'); }
+function resetar() { votei = null; document.getElementById('media-box').classList.remove('visivel'); socket.emit('resetar'); }
+function selTarefa(id) { votei = null; socket.emit('selecionarTarefa', { tarefaId: id }); }
+function salvarResultado() {
+  if (!estado?.tarefaAtiva) return;
+  socket.emit('salvarResultado', { tarefaId: estado.tarefaAtiva, pontos: parseInt(document.getElementById('sp-select').value) });
+  votei = null; document.getElementById('media-box').classList.remove('visivel');
+}
+
+// ══ MODAIS TAREFAS ══
+function abrirModalTarefa() {
+  fecharModals();
+  ['t-nome','t-desc','t-resp'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modal-tarefa').classList.add('ativo');
+  setTimeout(() => document.getElementById('t-nome').focus(), 100);
+}
+function adicionarTarefa() {
+  const nome = document.getElementById('t-nome').value.trim();
+  if (!nome) { document.getElementById('t-nome').focus(); return; }
+  socket.emit('adicionarTarefa', { nome, descricao: document.getElementById('t-desc').value.trim(), responsavel: document.getElementById('t-resp').value.trim() });
+  fecharModals();
+}
+function abrirModalEditar() {
+  const t = estado?.tarefas.find(x => x.id === estado.tarefaAtiva);
+  if (!t) return;
+  fecharModals();
+  document.getElementById('e-nome').value = t.nome || '';
+  document.getElementById('e-desc').value = t.descricao || '';
+  document.getElementById('e-resp').value = t.responsavel || '';
+  document.getElementById('modal-editar').classList.add('ativo');
+  setTimeout(() => document.getElementById('e-nome').focus(), 100);
+}
+function salvarEdicao() {
+  const nome = document.getElementById('e-nome').value.trim();
+  if (!nome) { document.getElementById('e-nome').focus(); return; }
+  socket.emit('editarTarefa', { tarefaId: estado.tarefaAtiva, nome, descricao: document.getElementById('e-desc').value.trim(), responsavel: document.getElementById('e-resp').value.trim() });
+  fecharModals();
+}
+
+// ══ UPLOAD ══
+function setupUpload() {
+  const ua = document.getElementById('upload-area');
+  ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag'); });
+  ua.addEventListener('dragleave', () => ua.classList.remove('drag'));
+  ua.addEventListener('drop', e => { e.preventDefault(); ua.classList.remove('drag'); if (e.dataTransfer.files[0]) processarArquivo(e.dataTransfer.files[0]); });
+}
+function abrirModalUpload() {
+  fecharModals(); tarefasImport = [];
+  document.getElementById('preview-box').classList.remove('visivel');
+  document.getElementById('preview-lista').innerHTML = '';
+  document.getElementById('upload-erro').textContent = '';
+  document.getElementById('btn-importar').disabled = true;
+  document.getElementById('input-arquivo').value = '';
+  document.getElementById('modal-upload').classList.add('ativo');
+}
+function processarArquivo(file) {
+  if (!file) return;
+  document.getElementById('upload-erro').textContent = '';
+  document.getElementById('preview-box').classList.remove('visivel');
+  tarefasImport = []; document.getElementById('btn-importar').disabled = true;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv') {
+    Papa.parse(file, { header:true, skipEmptyLines:true, complete: r => processarLinhas(r.data), error: () => { document.getElementById('upload-erro').textContent = 'Erro ao ler CSV.'; } });
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    const r = new FileReader();
+    r.onload = e => { try { const wb = XLSX.read(e.target.result, { type:'array' }); processarLinhas(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' })); } catch { document.getElementById('upload-erro').textContent = 'Erro ao ler XLSX.'; } };
+    r.readAsArrayBuffer(file);
+  } else { document.getElementById('upload-erro').textContent = 'Use .csv ou .xlsx'; }
+}
+function processarLinhas(linhas) {
+  const get = (obj, ops) => { for (const op of ops) { const k = Object.keys(obj).find(k => k.toLowerCase().trim() === op); if (k && obj[k]) return String(obj[k]).trim(); } return ''; };
+  tarefasImport = linhas.map(l => ({ nome: get(l,['nome','name','tarefa','task','titulo','title']), descricao: get(l,['descricao','descrição','description','desc']), responsavel: get(l,['responsavel','responsável','responsible','owner','assignee']) })).filter(t => t.nome.length > 0);
+  if (!tarefasImport.length) { document.getElementById('upload-erro').textContent = 'Coluna "nome" não encontrada.'; return; }
+  document.getElementById('preview-count').textContent = tarefasImport.length;
+  document.getElementById('preview-lista').innerHTML = tarefasImport.map(t => `<div class="preview-item"><span style="flex:1">${esc(t.nome)}</span>${t.responsavel ? `<span style="font-size:11px;color:var(--texts)">${esc(t.responsavel)}</span>` : ''}</div>`).join('');
+  document.getElementById('preview-box').classList.add('visivel');
+  document.getElementById('btn-importar').disabled = false;
+  toast(`${tarefasImport.length} tarefas encontradas!`);
+}
+function importarTarefas() {
+  if (!tarefasImport.length) return;
+  tarefasImport.forEach(t => socket.emit('adicionarTarefa', t));
+  toast(`${tarefasImport.length} tarefas importadas!`);
+  fecharModals();
+}
+
+// ══ UTILS ══
+function fecharModals() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('ativo')); }
+document.addEventListener('click', e => { if (e.target.classList.contains('overlay')) fecharModals(); });
+function copiarLink() { navigator.clipboard.writeText(`${location.origin}/sala/${minhaSalaId}`).then(() => toast('Link copiado!')); }
+function toast(msg, erro=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (erro ? ' erro' : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Enter nos modais
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fecharModals();
+  if (e.key === 'Enter') {
+    if (document.getElementById('modal-tarefa').classList.contains('ativo')) adicionarTarefa();
+    if (document.getElementById('modal-editar').classList.contains('ativo')) salvarEdicao();
+  }
+});
+</script>
+</body>
+</html>
