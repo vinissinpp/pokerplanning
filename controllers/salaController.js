@@ -1,16 +1,9 @@
 const { v4: uuidv4 } = require('uuid');
+const supabase       = require('../config/db');
 
+// Referência ao estado em memória (ainda usado para WebSocket em tempo real)
 let _salas = null;
 function init(salasRef) { _salas = salasRef; }
-
-function criarSalaObj(id, nome, donoId = null) {
-  return {
-    id, nome: nome || `Sala ${id}`, dono_id: donoId,
-    criada_em: new Date().toISOString(),
-    participantes: {}, tarefas: [], tarefaAtiva: null,
-    votos: {}, revelado: false, historico: [],
-  };
-}
 
 function calcularMetricas(sala) {
   const porColaborador = {};
@@ -33,34 +26,91 @@ function calcularMetricas(sala) {
 
 async function criar(req, res) {
   try {
-    const { nome } = req.body;
-    const donoId   = req.usuario?.id || null;
-    const id       = uuidv4().slice(0, 11);
-    _salas[id]     = criarSalaObj(id, nome?.trim(), donoId);
-    return res.status(201).json({ id, nome: _salas[id].nome });
+    const { nome }  = req.body;
+    const donoId    = req.usuario?.id || null;
+    const id        = uuidv4().slice(0, 11);
+    const nomeSala  = nome?.trim() || `Sala ${id}`;
+
+    // Salva no Supabase
+    const { error } = await supabase
+      .from('salas')
+      .insert({ id, nome: nomeSala, dono_id: donoId });
+
+    if (error) throw error;
+
+    // Cria também em memória para o WebSocket funcionar
+    _salas[id] = {
+      id, nome: nomeSala, dono_id: donoId,
+      participantes: {}, tarefas: [], tarefaAtiva: null,
+      votos: {}, revelado: false, historico: [],
+    };
+
+    return res.status(201).json({ id, nome: nomeSala });
   } catch (err) {
+    console.error('[sala:criar]', err);
     return res.status(500).json({ erro: 'Erro ao criar sala.' });
   }
 }
 
 async function buscar(req, res) {
-  const sala = _salas[req.params.id];
-  if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
-  return res.json({
-    id: sala.id, nome: sala.nome,
-    participantes: Object.values(sala.participantes).length,
-  });
+  try {
+    const { data: sala } = await supabase
+      .from('salas')
+      .select('id, nome')
+      .eq('id', req.params.id)
+      .single();
+
+    if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
+
+    return res.json({
+      id: sala.id,
+      nome: sala.nome,
+      participantes: Object.values(_salas[sala.id]?.participantes || {}).length,
+    });
+  } catch (err) {
+    return res.status(500).json({ erro: 'Erro ao buscar sala.' });
+  }
 }
 
 async function metricas(req, res) {
-  const sala = _salas[req.params.salaId];
-  if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
-  return res.json({
-    sala:      { id: sala.id, nome: sala.nome },
-    metricas:  calcularMetricas(sala),
-    historico: sala.historico,
-    tarefas:   sala.tarefas,
-  });
+  try {
+    const salaId = req.params.salaId;
+
+    // Busca sala
+    const { data: sala } = await supabase
+      .from('salas')
+      .select('id, nome')
+      .eq('id', salaId)
+      .single();
+
+    if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
+
+    // Busca tarefas
+    const { data: tarefas } = await supabase
+      .from('tarefas')
+      .select('*')
+      .eq('sala_id', salaId)
+      .order('ordem', { ascending: true });
+
+    // Busca histórico
+    const { data: historico } = await supabase
+      .from('historico')
+      .select('*')
+      .eq('sala_id', salaId)
+      .order('votado_em', { ascending: true });
+
+    const salaObj = { ...sala, tarefas: tarefas || [], historico: historico || [] };
+
+    return res.json({
+      sala:      { id: sala.id, nome: sala.nome },
+      metricas:  calcularMetricas(salaObj),
+      historico: historico || [],
+      tarefas:   tarefas   || [],
+    });
+  } catch (err) {
+    console.error('[sala:metricas]', err);
+    return res.status(500).json({ erro: 'Erro ao carregar métricas.' });
+  }
 }
 
 module.exports = { init, criar, buscar, metricas, calcularMetricas };
