@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PokerPlanning — Entrar ou Criar Conta</title>
+<title>Pontua — Entrar ou Criar Conta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <style>
 :root {
-  --c1:#ff4242; --c1d:#cc2e2e; --c1l:#fff5f5;
+  --c1:#ff4242; --c1d:#cc2e2e;
   --c2:#f4fad2; --c3:#d4ee5e; --c4:#e1edb9; --c5:#f0f2eb;
   --text:#1a1a1a; --textm:#555; --texts:#888;
   --white:#ffffff; --radius:14px; --radius-sm:9px;
@@ -16,206 +16,108 @@
 *{ box-sizing:border-box; margin:0; padding:0; }
 body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text); min-height:100vh; display:grid; grid-template-columns:1fr 1fr; }
 
-/* ── LADO ESQUERDO (VISUAL) ── */
-.left-panel {
-  background:var(--text);
-  display:flex; flex-direction:column; justify-content:space-between;
-  padding:2.5rem; min-height:100vh; position:sticky; top:0;
-}
-.left-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:17px; color:var(--white); display:flex; align-items:center; gap:7px; }
-.logo-dot { width:9px; height:9px; border-radius:50%; background:var(--c1); display:inline-block; }
+.left-panel{ background:var(--text); display:flex; flex-direction:column; justify-content:space-between; padding:2.5rem; min-height:100vh; position:sticky; top:0; }
+.left-logo{ font-family:'Syne',sans-serif; font-weight:800; font-size:20px; color:var(--white); display:flex; align-items:baseline; gap:6px; }
+.left-logo .dot{ width:9px; height:9px; border-radius:50%; background:var(--c1); display:inline-block; margin-right:2px; }
+.left-logo .sub{ font-size:12px; font-weight:400; color:#666; }
+.left-content{ flex:1; display:flex; flex-direction:column; justify-content:center; gap:2rem; }
+.left-title{ font-family:'Syne',sans-serif; font-size:clamp(32px,3.5vw,46px); font-weight:800; color:var(--white); line-height:1.1; }
+.left-title .accent{ color:var(--c3); }
+.left-sub{ font-size:15px; color:#aaa; line-height:1.7; max-width:360px; }
+.left-features{ display:flex; flex-direction:column; gap:12px; margin-top:1rem; }
+.lf-item{ display:flex; align-items:center; gap:12px; }
+.lf-icon{ width:36px; height:36px; border-radius:9px; background:rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.lf-text{ font-size:13px; color:#ccc; line-height:1.4; }
+.lf-text strong{ color:var(--white); }
+.left-bottom{ font-size:12px; color:#555; }
 
-.left-content { flex:1; display:flex; flex-direction:column; justify-content:center; gap:2rem; }
-.left-title {
-  font-family:'Syne',sans-serif; font-size:clamp(32px,3.5vw,48px); font-weight:800;
-  color:var(--white); line-height:1.1;
-}
-.left-title .accent { color:var(--c3); }
-.left-sub { font-size:15px; color:#aaa; line-height:1.7; max-width:360px; }
+.right-panel{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 2rem; overflow-y:auto; }
+.auth-box{ width:100%; max-width:420px; animation:fadeUp .4s ease both; }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
 
-.left-features { display:flex; flex-direction:column; gap:12px; margin-top:1rem; }
-.lf-item { display:flex; align-items:center; gap:12px; }
-.lf-icon { width:36px; height:36px; border-radius:9px; background:rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
-.lf-text { font-size:13px; color:#ccc; line-height:1.4; }
-.lf-text strong { color:var(--white); }
+.auth-tabs{ display:flex; gap:4px; background:var(--white); padding:4px; border-radius:var(--radius); margin-bottom:2rem; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+.auth-tab{ flex:1; padding:10px; border-radius:10px; border:none; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; background:transparent; color:var(--textm); transition:all .15s; }
+.auth-tab.ativo{ background:var(--c1); color:var(--white); box-shadow:0 2px 10px rgba(255,66,66,.25); }
+.tab-panel{ display:none; }
+.tab-panel.ativo{ display:block; }
 
-/* Preview mini card */
-.left-preview {
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
-  border-radius:var(--radius); padding:1.25rem 1.5rem;
-  margin-top:1.5rem;
-}
-.lp-label { font-size:10px; color:#777; text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
-.lp-task { font-family:'Syne',sans-serif; font-size:14px; color:var(--white); font-weight:700; margin-bottom:10px; }
-.lp-cartas { display:flex; gap:6px; }
-.lp-carta {
-  width:32px; height:45px; border-radius:6px; border:1px solid rgba(255,255,255,.15);
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:rgba(255,255,255,.4);
-}
-.lp-carta.sel { border-color:var(--c3); color:var(--c3); background:rgba(212,238,94,.08); transform:translateY(-6px); }
+/* Etapas do cadastro */
+.etapa{ display:none; }
+.etapa.ativa{ display:block; }
+.etapa-indicator{ display:flex; align-items:center; gap:8px; margin-bottom:1.5rem; }
+.etapa-step{ width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; border:2px solid var(--c4); color:var(--textm); transition:all .2s; }
+.etapa-step.ativo{ background:var(--c1); border-color:var(--c1); color:#fff; }
+.etapa-step.concluido{ background:var(--c3); border-color:var(--c3); color:#2a3a00; }
+.etapa-line{ flex:1; height:2px; background:var(--c4); border-radius:1px; }
+.etapa-line.ativo{ background:var(--c3); }
 
-.left-bottom { font-size:12px; color:#555; }
+.form-title{ font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:.4rem; }
+.form-sub{ font-size:14px; color:var(--textm); margin-bottom:1.5rem; line-height:1.5; }
+.field{ margin-bottom:1rem; }
+.field label{ display:block; font-size:11px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+.field input{ width:100%; padding:11px 14px; border:1.5px solid var(--c4); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--c5); outline:none; transition:all .15s; }
+.field input:focus{ border-color:var(--c1); background:var(--white); box-shadow:0 0 0 3px rgba(255,66,66,.08); }
+.field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.input-wrap{ position:relative; }
+.input-wrap input{ padding-right:44px; }
+.toggle-pass{ position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--texts); font-size:16px; padding:4px; }
+.senha-strength{ margin-top:6px; }
+.strength-bar{ height:3px; border-radius:2px; background:var(--c4); margin-bottom:4px; }
+.strength-fill{ height:100%; border-radius:2px; width:0%; transition:width .3s, background .3s; }
+.strength-label{ font-size:11px; color:var(--texts); }
+.check-row{ display:flex; align-items:flex-start; gap:10px; margin-bottom:1rem; }
+.check-row input[type=checkbox]{ width:16px; height:16px; accent-color:var(--c1); margin-top:2px; flex-shrink:0; cursor:pointer; }
+.check-label{ font-size:12px; color:var(--textm); line-height:1.5; cursor:pointer; }
+.check-label a{ color:var(--c1); text-decoration:none; }
+.btn-auth{ width:100%; padding:13px; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; background:var(--c1); color:var(--white); cursor:pointer; transition:all .2s; margin-top:.5rem; box-shadow:0 4px 16px rgba(255,66,66,.25); }
+.btn-auth:hover{ background:var(--c1d); transform:translateY(-1px); }
+.btn-auth:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+.btn-sec{ width:100%; padding:11px; border:1.5px solid var(--c4); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; background:var(--white); color:var(--text); cursor:pointer; transition:all .15s; margin-top:8px; }
+.btn-sec:hover{ background:var(--c5); border-color:#bbc890; }
+.erro-msg{ font-size:12px; color:var(--c1); min-height:16px; margin-top:.5rem; }
+.ok-msg{ font-size:12px; color:#2a7a4a; padding:8px 12px; background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); margin-top:.5rem; display:none; }
+.ok-msg.visivel{ display:block; }
+.terms{ font-size:11px; color:var(--texts); text-align:center; margin-top:1.25rem; line-height:1.6; }
+.terms a{ color:var(--c1); text-decoration:none; cursor:pointer; }
+.back-home{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--textm); text-decoration:none; margin-bottom:2rem; }
+.back-home:hover{ color:var(--text); }
 
-/* ── LADO DIREITO (FORMULÁRIO) ── */
-.right-panel {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:3rem 2rem; overflow-y:auto;
-}
-.auth-box { width:100%; max-width:420px; }
+/* Código de 6 dígitos */
+.codigo-inputs{ display:flex; gap:10px; justify-content:center; margin:1.5rem 0; }
+.codigo-input{ width:52px; height:62px; border:2px solid var(--c4); border-radius:var(--radius-sm); font-family:'Syne',sans-serif; font-size:28px; font-weight:800; text-align:center; background:var(--c5); color:var(--text); outline:none; transition:all .15s; }
+.codigo-input:focus{ border-color:var(--c1); background:var(--white); box-shadow:0 0 0 3px rgba(255,66,66,.08); }
+.reenviar-btn{ background:none; border:none; color:var(--c1); font-size:13px; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif; }
+.reenviar-btn:disabled{ color:var(--texts); cursor:not-allowed; }
 
-.auth-tabs {
-  display:flex; gap:4px; background:var(--white); padding:4px; border-radius:var(--radius);
-  margin-bottom:2rem; box-shadow:0 1px 4px rgba(0,0,0,.08);
-}
-.auth-tab {
-  flex:1; padding:10px; border-radius:10px; border:none;
-  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
-  cursor:pointer; background:transparent; color:var(--textm); transition:all .15s;
-}
-.auth-tab.ativo {
-  background:var(--c1); color:var(--white);
-  box-shadow:0 2px 10px rgba(255,66,66,.25);
-}
+.forgot{ font-size:12px; color:var(--c1); text-decoration:none; display:block; text-align:right; margin-top:4px; cursor:pointer; }
+.forgot:hover{ text-decoration:underline; }
 
-.tab-panel { display:none; }
-.tab-panel.ativo { display:block; }
-
-.form-title { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:.4rem; }
-.form-sub { font-size:14px; color:var(--textm); margin-bottom:2rem; line-height:1.5; }
-
-.field { margin-bottom:1.1rem; }
-.field label { display:block; font-size:11px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
-.field input {
-  width:100%; padding:11px 14px; border:1.5px solid var(--c4); border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--c5); outline:none;
-  transition:border-color .15s, background .15s, box-shadow .15s;
-}
-.field input:focus { border-color:var(--c1); background:var(--white); box-shadow:0 0 0 3px rgba(255,66,66,.08); }
-.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-
-/* Força senha */
-.senha-strength { margin-top:6px; }
-.strength-bar { height:3px; border-radius:2px; background:var(--c4); margin-bottom:4px; }
-.strength-fill { height:100%; border-radius:2px; width:0%; transition:width .3s, background .3s; }
-.strength-label { font-size:11px; color:var(--texts); }
-
-.input-wrap { position:relative; }
-.input-wrap input { padding-right:44px; }
-.toggle-pass {
-  position:absolute; right:12px; top:50%; transform:translateY(-50%);
-  background:none; border:none; cursor:pointer; color:var(--texts); font-size:16px; padding:4px;
-}
-.toggle-pass:hover { color:var(--text); }
-
-.forgot { font-size:12px; color:var(--c1); text-decoration:none; display:block; text-align:right; margin-top:4px; }
-.forgot:hover { text-decoration:underline; }
-
-.btn-auth {
-  width:100%; padding:13px; border:none; border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
-  background:var(--c1); color:var(--white);
-  cursor:pointer; transition:all .2s; margin-top:.5rem;
-  box-shadow:0 4px 16px rgba(255,66,66,.25);
-}
-.btn-auth:hover { background:var(--c1d); transform:translateY(-1px); box-shadow:0 6px 22px rgba(255,66,66,.3); }
-.btn-auth:active { transform:none; }
-.btn-auth:disabled { opacity:.6; cursor:not-allowed; transform:none; }
-
-.or-divider { display:flex; align-items:center; gap:10px; margin:1.25rem 0; }
-.or-divider span { font-size:11px; color:var(--texts); white-space:nowrap; }
-.or-divider::before,.or-divider::after { content:''; flex:1; height:1px; background:var(--c4); }
-
-.btn-oauth {
-  width:100%; padding:11px; border:1.5px solid var(--c4); border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
-  background:var(--white); color:var(--text);
-  cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:10px;
-  margin-bottom:10px; text-decoration:none;
-}
-.btn-oauth:hover { background:var(--c5); border-color:#bbc890; transform:translateY(-1px); }
-.oauth-icon { font-size:18px; }
-
-.terms { font-size:11px; color:var(--texts); text-align:center; margin-top:1.25rem; line-height:1.6; }
-.terms a { color:var(--c1); text-decoration:none; }
-.terms a:hover { text-decoration:underline; }
-
-.erro-msg { font-size:12px; color:var(--c1); min-height:16px; margin-top:.5rem; }
-.sucesso-msg { font-size:12px; color:#2a7a4a; min-height:16px; margin-top:.5rem; background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:8px 12px; display:none; }
-.sucesso-msg.visivel { display:block; }
-
-.back-home { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--textm); text-decoration:none; margin-bottom:2rem; transition:color .15s; }
-.back-home:hover { color:var(--text); }
-
-/* Checkbox */
-.check-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:1rem; }
-.check-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--c1); margin-top:2px; flex-shrink:0; cursor:pointer; }
-.check-label { font-size:12px; color:var(--textm); line-height:1.5; cursor:pointer; }
-.check-label a { color:var(--c1); text-decoration:none; }
-
-/* Plano badge */
-.plan-badge {
-  display:inline-flex; align-items:center; gap:6px; padding:6px 12px;
-  background:var(--c2); border:1px solid var(--c4); border-radius:20px;
-  font-size:12px; color:#2a3a00; font-weight:500; margin-bottom:1.5rem;
-}
-
-@keyframes fadeUp { from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
-.auth-box { animation:fadeUp .4s ease both; }
-
-@media(max-width:800px) {
-  body { grid-template-columns:1fr; }
-  .left-panel { display:none; }
-  .right-panel { padding:2rem 1.25rem; justify-content:flex-start; padding-top:3rem; }
-}
+@media(max-width:800px){ body{ grid-template-columns:1fr; } .left-panel{ display:none; } .right-panel{ padding:2rem 1.25rem; justify-content:flex-start; padding-top:3rem; } }
 </style>
 </head>
 <body>
 
-<!-- ── LADO ESQUERDO ── -->
+<!-- ── ESQUERDA ── -->
 <div class="left-panel">
-  <div class="left-logo"><span class="logo-dot"></span>PokerPlanning</div>
-
+  <div class="left-logo">
+    <span class="dot"></span>Pontua
+    <span class="sub">planning</span>
+  </div>
   <div class="left-content">
     <div>
       <div class="left-title">Estime melhor.<br><span class="accent">Entregue mais.</span></div>
       <div class="left-sub" style="margin-top:1rem;">Crie uma conta e tenha acesso a histórico permanente, múltiplas salas e métricas completas do seu time.</div>
     </div>
-
     <div class="left-features">
-      <div class="lf-item">
-        <div class="lf-icon">📊</div>
-        <div class="lf-text"><strong>Histórico permanente</strong><br>Acesse os dados de sprints anteriores a qualquer momento.</div>
-      </div>
-      <div class="lf-item">
-        <div class="lf-icon">🏠</div>
-        <div class="lf-text"><strong>Salas organizadas</strong><br>Gerencie múltiplos projetos e times num só lugar.</div>
-      </div>
-      <div class="lf-item">
-        <div class="lf-icon">👥</div>
-        <div class="lf-text"><strong>Time sempre pronto</strong><br>Salve os participantes e convide com um clique.</div>
-      </div>
-    </div>
-
-    <div class="left-preview">
-      <div class="lp-label">Sala ativa agora</div>
-      <div class="lp-task">Refatorar módulo de autenticação</div>
-      <div class="lp-cartas">
-        <div class="lp-carta">1</div>
-        <div class="lp-carta">2</div>
-        <div class="lp-carta">3</div>
-        <div class="lp-carta sel">5</div>
-        <div class="lp-carta">8</div>
-        <div class="lp-carta">13</div>
-        <div class="lp-carta">21</div>
-      </div>
+      <div class="lf-item"><div class="lf-icon">📊</div><div class="lf-text"><strong>Histórico permanente</strong><br>Acesse dados de sprints anteriores a qualquer momento.</div></div>
+      <div class="lf-item"><div class="lf-icon">🏠</div><div class="lf-text"><strong>Salas organizadas</strong><br>Gerencie múltiplos projetos e times num só lugar.</div></div>
+      <div class="lf-item"><div class="lf-icon">👥</div><div class="lf-text"><strong>Time sempre pronto</strong><br>Salve participantes e convide com um clique.</div></div>
     </div>
   </div>
-
-  <div class="left-bottom">© 2025 PokerPlanning</div>
+  <div class="left-bottom">© 2025 Pontua Planning</div>
 </div>
 
-<!-- ── LADO DIREITO ── -->
+<!-- ── DIREITA ── -->
 <div class="right-panel">
   <div class="auth-box">
     <a class="back-home" href="/">← Voltar ao início</a>
@@ -227,110 +129,161 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 
     <!-- ══ LOGIN ══ -->
     <div class="tab-panel ativo" id="tp-login">
-      <div class="form-title">Bem-vindo de volta!</div>
-      <div class="form-sub">Entre com seu e-mail e senha para continuar.</div>
-
-      <button class="btn-oauth" onclick="loginGoogle()">
-        <span class="oauth-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-        </span>
-        Continuar com Google
-      </button>
-
-      <div class="or-divider"><span>ou com e-mail</span></div>
-
-      <div class="field">
-        <label>E-mail</label>
-        <input type="email" id="login-email" placeholder="voce@empresa.com" autocomplete="email" />
-      </div>
-      <div class="field">
-        <label>Senha</label>
-        <div class="input-wrap">
-          <input type="password" id="login-senha" placeholder="Sua senha" autocomplete="current-password" />
-          <button type="button" class="toggle-pass" onclick="toggleSenha('login-senha',this)">👁️</button>
+      <!-- Etapa 1: Login normal -->
+      <div class="etapa ativa" id="login-etapa-1">
+        <div class="form-title">Bem-vindo de volta!</div>
+        <div class="form-sub">Entre com seu e-mail e senha para continuar.</div>
+        <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="voce@empresa.com" autocomplete="email"/></div>
+        <div class="field">
+          <label>Senha</label>
+          <div class="input-wrap">
+            <input type="password" id="login-senha" placeholder="Sua senha" autocomplete="current-password"/>
+            <button type="button" class="toggle-pass" onclick="toggleSenha('login-senha',this)">👁️</button>
+          </div>
+          <span class="forgot" onclick="mudarTab('recuperar')">Esqueci minha senha</span>
         </div>
-        <a class="forgot" href="/esqueci-senha">Esqueci minha senha</a>
+        <div class="erro-msg" id="login-erro"></div>
+        <div class="ok-msg" id="login-ok"></div>
+        <button class="btn-auth" id="btn-login" onclick="fazerLogin()">Entrar na conta</button>
+        <div class="terms">Não tem conta? <a onclick="mudarTab('cadastro')">Criar conta grátis →</a></div>
       </div>
-      <div class="erro-msg" id="login-erro"></div>
-      <div class="sucesso-msg" id="login-ok"></div>
-      <button class="btn-auth" id="btn-login" onclick="fazerLogin()">Entrar na conta</button>
 
-      <div class="terms">Não tem conta? <a href="#" onclick="mudarTab('cadastro');return false;">Criar conta grátis →</a></div>
+      <!-- Etapa 2: Confirmar email (se ainda não confirmou) -->
+      <div class="etapa" id="login-etapa-confirmar">
+        <div class="form-title">Confirme seu e-mail</div>
+        <div class="form-sub">Enviamos um código para <strong id="login-email-exibir"></strong>. Digite abaixo para ativar sua conta.</div>
+        <div class="codigo-inputs">
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,0,'login-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,1,'login-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,2,'login-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,3,'login-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,4,'login-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,5,'login-conf')"/>
+        </div>
+        <div class="erro-msg" id="login-conf-erro"></div>
+        <button class="btn-auth" onclick="confirmarEmailLogin()">Confirmar e entrar</button>
+        <button class="btn-sec" onclick="reenviarCodigo('login-email-guard')">Reenviar código</button>
+      </div>
     </div>
 
     <!-- ══ CADASTRO ══ -->
     <div class="tab-panel" id="tp-cadastro">
-      <div class="plan-badge">✨ Plano Gratuito — sem cartão de crédito</div>
-      <div class="form-title">Criar sua conta</div>
-      <div class="form-sub">Leva menos de um minuto. Comece a estimar hoje.</div>
-
-      <button class="btn-oauth" onclick="loginGoogle()">
-        <span class="oauth-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-        </span>
-        Cadastrar com Google
-      </button>
-
-      <div class="or-divider"><span>ou com e-mail</span></div>
-
-      <div class="field-row">
+      <!-- Etapa 1: Dados -->
+      <div class="etapa ativa" id="cad-etapa-1">
+        <div class="etapa-indicator">
+          <div class="etapa-step ativo" id="cad-step-1">1</div>
+          <div class="etapa-line" id="cad-line-1"></div>
+          <div class="etapa-step" id="cad-step-2">2</div>
+        </div>
+        <div class="form-title">Criar sua conta</div>
+        <div class="form-sub">Plano gratuito — sem cartão de crédito.</div>
+        <div class="field-row">
+          <div class="field"><label>Nome</label><input type="text" id="cad-nome" placeholder="Ana" maxlength="30"/></div>
+          <div class="field"><label>Sobrenome</label><input type="text" id="cad-sobrenome" placeholder="Lima" maxlength="40"/></div>
+        </div>
+        <div class="field"><label>E-mail</label><input type="email" id="cad-email" placeholder="voce@empresa.com" autocomplete="email"/></div>
         <div class="field">
-          <label>Nome</label>
-          <input type="text" id="cad-nome" placeholder="Ana" maxlength="30" />
+          <label>Senha</label>
+          <div class="input-wrap">
+            <input type="password" id="cad-senha" placeholder="Mínimo 8 caracteres" oninput="medirForca(this.value)" autocomplete="new-password"/>
+            <button type="button" class="toggle-pass" onclick="toggleSenha('cad-senha',this)">👁️</button>
+          </div>
+          <div class="senha-strength">
+            <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+            <div class="strength-label" id="strength-label">Digite uma senha</div>
+          </div>
         </div>
-        <div class="field">
-          <label>Sobrenome</label>
-          <input type="text" id="cad-sobrenome" placeholder="Lima" maxlength="40" />
+        <div class="check-row">
+          <input type="checkbox" id="cad-termos"/>
+          <label class="check-label" for="cad-termos">Concordo com os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a></label>
         </div>
-      </div>
-      <div class="field">
-        <label>E-mail profissional</label>
-        <input type="email" id="cad-email" placeholder="voce@empresa.com" autocomplete="email" />
-      </div>
-      <div class="field">
-        <label>Senha</label>
-        <div class="input-wrap">
-          <input type="password" id="cad-senha" placeholder="Mínimo 8 caracteres" maxlength="100" oninput="medirForça(this.value)" autocomplete="new-password" />
-          <button type="button" class="toggle-pass" onclick="toggleSenha('cad-senha',this)">👁️</button>
-        </div>
-        <div class="senha-strength">
-          <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
-          <div class="strength-label" id="strength-label">Digite uma senha</div>
-        </div>
+        <div class="erro-msg" id="cad-erro"></div>
+        <button class="btn-auth" id="btn-cad" onclick="fazerCadastro()">Criar conta grátis →</button>
+        <div class="terms">Já tem conta? <a onclick="mudarTab('login')">← Entrar</a></div>
       </div>
 
-      <div class="check-row">
-        <input type="checkbox" id="cad-termos" />
-        <label class="check-label" for="cad-termos">Concordo com os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a></label>
+      <!-- Etapa 2: Confirmar código -->
+      <div class="etapa" id="cad-etapa-2">
+        <div class="etapa-indicator">
+          <div class="etapa-step concluido" id="cad-step-1b">✓</div>
+          <div class="etapa-line ativo" id="cad-line-1b"></div>
+          <div class="etapa-step ativo" id="cad-step-2b">2</div>
+        </div>
+        <div class="form-title">Confirme seu e-mail</div>
+        <div class="form-sub">Enviamos um código de 6 dígitos para <strong id="cad-email-exibir"></strong>.</div>
+        <div class="codigo-inputs">
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,0,'cad-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,1,'cad-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,2,'cad-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,3,'cad-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,4,'cad-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,5,'cad-conf')"/>
+        </div>
+        <div class="erro-msg" id="cad-conf-erro"></div>
+        <div class="ok-msg" id="cad-conf-ok"></div>
+        <button class="btn-auth" onclick="confirmarEmailCadastro()">Confirmar e entrar →</button>
+        <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--textm);">
+          Não recebeu? <button class="reenviar-btn" onclick="reenviarCodigo('cad-email-guard')">Reenviar código</button>
+        </div>
       </div>
+    </div>
 
-      <div class="erro-msg" id="cad-erro"></div>
-      <div class="sucesso-msg" id="cad-ok">✅ Conta criada! Verifique seu e-mail para ativar a conta.</div>
-
-      <button class="btn-auth" id="btn-cad" onclick="fazerCadastro()">Criar conta grátis →</button>
-
-      <div class="terms">Já tem conta? <a href="#" onclick="mudarTab('login');return false;">← Entrar</a></div>
+    <!-- ══ RECUPERAR SENHA ══ -->
+    <div class="tab-panel" id="tp-recuperar">
+      <div class="etapa ativa" id="rec-etapa-1">
+        <div class="form-title">Recuperar senha</div>
+        <div class="form-sub">Informe seu e-mail e enviaremos um código de recuperação.</div>
+        <div class="field"><label>E-mail</label><input type="email" id="rec-email" placeholder="voce@empresa.com"/></div>
+        <div class="erro-msg" id="rec-erro"></div>
+        <div class="ok-msg" id="rec-ok"></div>
+        <button class="btn-auth" onclick="enviarRecuperacao()">Enviar código</button>
+        <button class="btn-sec" onclick="mudarTab('login')">← Voltar ao login</button>
+      </div>
+      <div class="etapa" id="rec-etapa-2">
+        <div class="form-title">Digite o código</div>
+        <div class="form-sub">Código enviado para <strong id="rec-email-exibir"></strong>.</div>
+        <div class="codigo-inputs">
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,0,'rec-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,1,'rec-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,2,'rec-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,3,'rec-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,4,'rec-conf')"/>
+          <input class="codigo-input" maxlength="1" type="text" inputmode="numeric" oninput="avancarCodigo(this,5,'rec-conf')"/>
+        </div>
+        <div class="field"><label>Nova senha</label>
+          <div class="input-wrap">
+            <input type="password" id="rec-nova-senha" placeholder="Mínimo 8 caracteres"/>
+            <button type="button" class="toggle-pass" onclick="toggleSenha('rec-nova-senha',this)">👁️</button>
+          </div>
+        </div>
+        <div class="erro-msg" id="rec-conf-erro"></div>
+        <button class="btn-auth" onclick="redefinirSenha()">Redefinir senha</button>
+      </div>
     </div>
 
   </div>
 </div>
 
 <script>
+// ── Guards de e-mail entre etapas ──
+let emailGuards = {};
+
 function mudarTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('ativo'));
   document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('ativo'));
-  document.getElementById('tab-' + tab).classList.add('ativo');
-  document.getElementById('tp-' + tab).classList.add('ativo');
+  const tabId = tab === 'recuperar' ? 'recuperar' : tab;
+  document.getElementById('tab-' + (tab === 'recuperar' ? 'login' : tab))?.classList.add('ativo');
+  document.getElementById('tp-' + tabId)?.classList.add('ativo');
 }
 
 function toggleSenha(id, btn) {
   const input = document.getElementById(id);
-  input.type = input.type === 'password' ? 'text' : 'password';
+  input.type  = input.type === 'password' ? 'text' : 'password';
   btn.textContent = input.type === 'password' ? '👁️' : '🙈';
 }
 
-function medirForça(senha) {
-  const fill = document.getElementById('strength-fill');
+function medirForca(senha) {
+  const fill  = document.getElementById('strength-fill');
   const label = document.getElementById('strength-label');
   let score = 0;
   if (senha.length >= 8) score++;
@@ -346,100 +299,202 @@ function medirForça(senha) {
   ];
   const l = levels[score];
   fill.style.width = l.pct; fill.style.background = l.color;
-  label.textContent = l.text; label.style.color = l.color === 'transparent' ? '#888' : l.color;
+  label.textContent = l.text;
 }
 
-async function fazerLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const senha = document.getElementById('login-senha').value;
-  const err = document.getElementById('login-erro');
-  const ok = document.getElementById('login-ok');
-  err.textContent = ''; ok.classList.remove('visivel');
-
-  if (!email) { err.textContent = 'Informe seu e-mail.'; return; }
-  if (!senha) { err.textContent = 'Informe sua senha.'; return; }
-
-  const btn = document.getElementById('btn-login');
-  btn.disabled = true; btn.textContent = 'Entrando...';
-
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      ok.textContent = '✅ ' + (data.mensagem || 'Login realizado!');
-      ok.classList.add('visivel');
-      setTimeout(() => window.location.href = data.redirect || '/', 800);
-    } else {
-      err.textContent = data.erro || 'E-mail ou senha incorretos.';
-    }
-  } catch {
-    err.textContent = 'Erro de conexão. Tente novamente.';
-  }
-  btn.disabled = false; btn.textContent = 'Entrar na conta';
+// Avança foco entre inputs de código
+function avancarCodigo(input, idx, prefixo) {
+  input.value = input.value.replace(/\D/g,'');
+  const inputs = document.querySelectorAll(`#${prefixo === 'cad-conf' ? 'cad-etapa-2' : prefixo === 'login-conf' ? 'login-etapa-confirmar' : 'rec-etapa-2'} .codigo-input`);
+  if (input.value && idx < 5) inputs[idx+1].focus();
 }
 
+function getCodigo(prefixo) {
+  const etapaId = prefixo === 'cad-conf' ? 'cad-etapa-2' : prefixo === 'login-conf' ? 'login-etapa-confirmar' : 'rec-etapa-2';
+  return [...document.querySelectorAll(`#${etapaId} .codigo-input`)].map(i => i.value).join('');
+}
+
+function salvarToken(token, usuario) {
+  localStorage.setItem('pontua_token', token);
+  localStorage.setItem('pontua_usuario', JSON.stringify(usuario));
+}
+
+// ── CADASTRO ──
 async function fazerCadastro() {
-  const nome = document.getElementById('cad-nome').value.trim();
-  const sobrenome = document.getElementById('cad-sobrenome').value.trim();
-  const email = document.getElementById('cad-email').value.trim();
-  const senha = document.getElementById('cad-senha').value;
-  const termos = document.getElementById('cad-termos').checked;
-  const err = document.getElementById('cad-erro');
-  const ok = document.getElementById('cad-ok');
-  err.textContent = ''; ok.classList.remove('visivel');
+  const nome     = document.getElementById('cad-nome').value.trim();
+  const sobre    = document.getElementById('cad-sobrenome').value.trim();
+  const email    = document.getElementById('cad-email').value.trim();
+  const senha    = document.getElementById('cad-senha').value;
+  const termos   = document.getElementById('cad-termos').checked;
+  const err      = document.getElementById('cad-erro');
+  err.textContent = '';
 
-  if (!nome) { err.textContent = 'Informe seu nome.'; return; }
-  if (!email) { err.textContent = 'Informe seu e-mail.'; return; }
-  if (senha.length < 8) { err.textContent = 'A senha precisa ter pelo menos 8 caracteres.'; return; }
-  if (!termos) { err.textContent = 'Aceite os termos de uso para continuar.'; return; }
+  if (!nome)    return err.textContent = 'Informe seu nome.';
+  if (!email)   return err.textContent = 'Informe seu e-mail.';
+  if (senha.length < 8) return err.textContent = 'Senha precisa ter pelo menos 8 caracteres.';
+  if (!termos)  return err.textContent = 'Aceite os termos para continuar.';
 
   const btn = document.getElementById('btn-cad');
   btn.disabled = true; btn.textContent = 'Criando conta...';
 
   try {
-    const res = await fetch('/api/auth/cadastro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome: nome + ' ' + sobrenome, email, senha })
+    const res  = await fetch('/api/auth/cadastro', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ nome: nome + (sobre ? ' ' + sobre : ''), email, senha })
     });
     const data = await res.json();
     if (res.ok) {
-      ok.classList.add('visivel');
-      btn.textContent = '✅ Conta criada!';
-      setTimeout(() => window.location.href = data.redirect || '/', 2000);
+      emailGuards['cad'] = email;
+      document.getElementById('cad-email-exibir').textContent = email;
+      document.getElementById('cad-etapa-1').classList.remove('ativa');
+      document.getElementById('cad-etapa-2').classList.add('ativa');
     } else {
       err.textContent = data.erro || 'Erro ao criar conta.';
-      btn.disabled = false; btn.textContent = 'Criar conta grátis →';
     }
-  } catch {
-    err.textContent = 'Erro de conexão. Tente novamente.';
-    btn.disabled = false; btn.textContent = 'Criar conta grátis →';
-  }
+  } catch { err.textContent = 'Erro de conexão.'; }
+  btn.disabled = false; btn.textContent = 'Criar conta grátis →';
 }
 
-function loginGoogle() {
-  // Futuramente: window.location.href = '/api/auth/google';
-  alert('Login com Google será integrado com o backend de autenticação.');
+async function confirmarEmailCadastro() {
+  const codigo = getCodigo('cad-conf');
+  const err    = document.getElementById('cad-conf-erro');
+  const ok     = document.getElementById('cad-conf-ok');
+  err.textContent = ''; ok.classList.remove('visivel');
+
+  if (codigo.length < 6) return err.textContent = 'Digite o código completo de 6 dígitos.';
+
+  try {
+    const res  = await fetch('/api/auth/confirmar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: emailGuards['cad'], codigo })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      salvarToken(data.token, data.usuario);
+      ok.textContent = '✅ ' + data.mensagem; ok.classList.add('visivel');
+      setTimeout(() => window.location.href = data.redirect || '/', 1000);
+    } else {
+      err.textContent = data.erro || 'Código inválido.';
+    }
+  } catch { err.textContent = 'Erro de conexão.'; }
 }
 
-// Enter nos campos
-document.getElementById('login-senha').addEventListener('keydown', e => e.key === 'Enter' && fazerLogin());
-document.getElementById('cad-senha').addEventListener('keydown', e => e.key === 'Enter' && fazerCadastro());
+// ── LOGIN ──
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const err   = document.getElementById('login-erro');
+  const ok    = document.getElementById('login-ok');
+  err.textContent = ''; ok.classList.remove('visivel');
 
-// Checa URL params
+  if (!email) return err.textContent = 'Informe seu e-mail.';
+  if (!senha) return err.textContent = 'Informe sua senha.';
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+
+  try {
+    const res  = await fetch('/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, senha })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      salvarToken(data.token, data.usuario);
+      ok.textContent = '✅ ' + data.mensagem; ok.classList.add('visivel');
+      setTimeout(() => window.location.href = data.redirect || '/', 800);
+    } else if (data.acao === 'confirmar') {
+      emailGuards['login'] = data.email || email;
+      document.getElementById('login-email-exibir').textContent = emailGuards['login'];
+      document.getElementById('login-etapa-1').classList.remove('ativa');
+      document.getElementById('login-etapa-confirmar').classList.add('ativa');
+    } else {
+      err.textContent = data.erro || 'E-mail ou senha incorretos.';
+    }
+  } catch { err.textContent = 'Erro de conexão.'; }
+  btn.disabled = false; btn.textContent = 'Entrar na conta';
+}
+
+async function confirmarEmailLogin() {
+  const codigo = getCodigo('login-conf');
+  const err    = document.getElementById('login-conf-erro');
+  if (codigo.length < 6) return err.textContent = 'Digite o código completo.';
+
+  try {
+    const res  = await fetch('/api/auth/confirmar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: emailGuards['login'], codigo })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      salvarToken(data.token, data.usuario);
+      window.location.href = data.redirect || '/';
+    } else { err.textContent = data.erro || 'Código inválido.'; }
+  } catch { err.textContent = 'Erro de conexão.'; }
+}
+
+// ── RECUPERAR SENHA ──
+async function enviarRecuperacao() {
+  const email = document.getElementById('rec-email').value.trim();
+  const err   = document.getElementById('rec-erro');
+  const ok    = document.getElementById('rec-ok');
+  err.textContent = ''; ok.classList.remove('visivel');
+  if (!email) return err.textContent = 'Informe seu e-mail.';
+
+  try {
+    const res  = await fetch('/api/auth/esqueci-senha', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    emailGuards['rec'] = email;
+    document.getElementById('rec-email-exibir').textContent = email;
+    ok.textContent = data.mensagem; ok.classList.add('visivel');
+    setTimeout(() => {
+      document.getElementById('rec-etapa-1').classList.remove('ativa');
+      document.getElementById('rec-etapa-2').classList.add('ativa');
+    }, 1200);
+  } catch { err.textContent = 'Erro de conexão.'; }
+}
+
+async function redefinirSenha() {
+  const codigo    = getCodigo('rec-conf');
+  const novaSenha = document.getElementById('rec-nova-senha').value;
+  const err       = document.getElementById('rec-conf-erro');
+  err.textContent = '';
+  if (codigo.length < 6) return err.textContent = 'Digite o código completo.';
+  if (novaSenha.length < 8) return err.textContent = 'Senha precisa ter pelo menos 8 caracteres.';
+
+  try {
+    const res  = await fetch('/api/auth/redefinir-senha', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: emailGuards['rec'], codigo, novaSenha })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert('✅ ' + data.mensagem);
+      mudarTab('login');
+    } else { err.textContent = data.erro || 'Código inválido.'; }
+  } catch { err.textContent = 'Erro de conexão.'; }
+}
+
+// ── REENVIAR CÓDIGO ──
+async function reenviarCodigo(guard) {
+  const email = emailGuards[guard === 'cad-email-guard' ? 'cad' : 'login'];
+  if (!email) return;
+  await fetch('/api/auth/reenviar-codigo', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email })
+  });
+  alert('Novo código enviado!');
+}
+
+// Checa params da URL
 const params = new URLSearchParams(location.search);
 if (params.get('acao') === 'cadastro') mudarTab('cadastro');
 
-// Animação cartas do preview
-const cartasPreview = document.querySelectorAll('.lp-carta');
-setInterval(() => {
-  cartasPreview.forEach(c => c.classList.remove('sel'));
-  cartasPreview[Math.floor(Math.random() * cartasPreview.length)].classList.add('sel');
-}, 2200);
+// Enter nos campos
+document.getElementById('login-senha').addEventListener('keydown', e => e.key === 'Enter' && fazerLogin());
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
-  "name": "pokerplanning",
-  "version": "2.0.0",
-  "description": "Planning Poker em tempo real",
+  "name": "pontuaplanning",
+  "version": "3.0.0",
+  "description": "Planning Poker em tempo real — Pontua",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,6 +15,7 @@
     "express": "^4.18.2",
     "express-rate-limit": "^7.3.1",
     "jsonwebtoken": "^9.0.2",
+    "resend": "^3.2.0",
     "socket.io": "^4.7.2",
     "uuid": "^9.0.0"
   },

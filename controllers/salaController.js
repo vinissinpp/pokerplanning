@@ -1,7 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const supabase       = require('../config/db');
 
-// Referência ao estado em memória (ainda usado para WebSocket em tempo real)
 let _salas = null;
 function init(salasRef) { _salas = salasRef; }
 
@@ -27,20 +26,20 @@ function calcularMetricas(sala) {
 async function criar(req, res) {
   try {
     const { nome }  = req.body;
-    const donoId    = req.usuario?.id || null;
+    const donoId    = req.usuario?.id   || null;
+    const donoNome  = req.usuario?.nome || null;
     const id        = uuidv4().slice(0, 11);
     const nomeSala  = nome?.trim() || `Sala ${id}`;
 
-    // Salva no Supabase
     const { error } = await supabase
       .from('salas')
-      .insert({ id, nome: nomeSala, dono_id: donoId });
+      .insert({ id, nome: nomeSala, dono_id: donoId, dono_nome: donoNome });
 
     if (error) throw error;
 
-    // Cria também em memória para o WebSocket funcionar
     _salas[id] = {
-      id, nome: nomeSala, dono_id: donoId,
+      id, nome: nomeSala,
+      donoId, donoSocketId: null, // será preenchido quando o dono entrar
       participantes: {}, tarefas: [], tarefaAtiva: null,
       votos: {}, revelado: false, historico: [],
     };
@@ -55,16 +54,12 @@ async function criar(req, res) {
 async function buscar(req, res) {
   try {
     const { data: sala } = await supabase
-      .from('salas')
-      .select('id, nome')
-      .eq('id', req.params.id)
-      .single();
+      .from('salas').select('id, nome').eq('id', req.params.id).single();
 
     if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
 
     return res.json({
-      id: sala.id,
-      nome: sala.nome,
+      id: sala.id, nome: sala.nome,
       participantes: Object.values(_salas[sala.id]?.participantes || {}).length,
     });
   } catch (err) {
@@ -76,28 +71,12 @@ async function metricas(req, res) {
   try {
     const salaId = req.params.salaId;
 
-    // Busca sala
     const { data: sala } = await supabase
-      .from('salas')
-      .select('id, nome')
-      .eq('id', salaId)
-      .single();
-
+      .from('salas').select('id, nome').eq('id', salaId).single();
     if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
 
-    // Busca tarefas
-    const { data: tarefas } = await supabase
-      .from('tarefas')
-      .select('*')
-      .eq('sala_id', salaId)
-      .order('ordem', { ascending: true });
-
-    // Busca histórico
-    const { data: historico } = await supabase
-      .from('historico')
-      .select('*')
-      .eq('sala_id', salaId)
-      .order('votado_em', { ascending: true });
+    const { data: tarefas }   = await supabase.from('tarefas').select('*').eq('sala_id', salaId).order('ordem');
+    const { data: historico } = await supabase.from('historico').select('*').eq('sala_id', salaId).order('votado_em');
 
     const salaObj = { ...sala, tarefas: tarefas || [], historico: historico || [] };
 
@@ -108,7 +87,6 @@ async function metricas(req, res) {
       tarefas:   tarefas   || [],
     });
   } catch (err) {
-    console.error('[sala:metricas]', err);
     return res.status(500).json({ erro: 'Erro ao carregar métricas.' });
   }
 }
