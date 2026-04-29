@@ -1,38 +1,68 @@
+/**
+ * server.js — Pontua Planning v3.0
+ * Express + Socket.io + JWT + Supabase + Segurança
+ */
+
 require('dotenv').config();
 
 const express    = require('express');
 const http       = require('http');
 const { Server } = require('socket.io');
 const path       = require('path');
-const cors       = require('cors');
+
+const { corsConfig, helmetConfig, sanitizarBody, bloquearPayloadGrande } = require('./middleware/seguranca');
+const { geral }      = require('./middleware/rateLimit');
+const { iniciarLimpeza } = require('./middleware/limpeza');
 
 const rotasAuth  = require('./routes/auth');
 const rotasSala  = require('./routes/sala');
 const salaCtrl   = require('./controllers/salaController');
 const socketHdl  = require('./socket/handlers');
-const { geral }  = require('./middleware/rateLimit');
 
-// Estado em memória
+// ─────────────────────────────────────────────
+// ESTADO EM MEMÓRIA
+// ─────────────────────────────────────────────
 const salas = {};
 salaCtrl.init(salas);
 
+// ─────────────────────────────────────────────
+// APP
+// ─────────────────────────────────────────────
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, {
-  cors:         { origin: '*' },
+  cors: {
+    origin: [
+      process.env.APP_URL,
+      process.env.CORS_ORIGIN,
+      'http://localhost:3000',
+    ].filter(Boolean),
+    methods: ['GET', 'POST'],
+  },
   transports:   ['websocket', 'polling'],
   pingTimeout:  60000,
   pingInterval: 25000,
+  maxHttpBufferSize: 1e6, // 1MB max por mensagem WebSocket
 });
 
-// Middlewares globais
-app.use(cors({ origin: '*' }));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
+// ─────────────────────────────────────────────
+// MIDDLEWARES GLOBAIS
+// ─────────────────────────────────────────────
+app.use(helmetConfig);
+app.use(corsConfig);
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(bloquearPayloadGrande);
+app.use(sanitizarBody);
 app.use(geral);
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rotas API
+// Remove header que revela tecnologia usada
+app.disable('x-powered-by');
+
+// ─────────────────────────────────────────────
+// ROTAS API
+// ─────────────────────────────────────────────
 app.use('/api/auth', rotasAuth);
 app.use('/api/sala', rotasSala);
 
@@ -47,11 +77,14 @@ app.get('/api/metricas/:salaId', (req, res) => {
   });
 });
 
+// Health check — sem dados sensíveis
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: Math.floor(process.uptime()) });
 });
 
-// Rotas front-end
+// ─────────────────────────────────────────────
+// ROTAS FRONT-END
+// ─────────────────────────────────────────────
 const pub = (file) => (req, res) =>
   res.sendFile(path.join(__dirname, 'public', file));
 
@@ -61,10 +94,40 @@ app.get('/login',        pub('cadastro.html'));
 app.get('/metricas/:id', pub('sala.html'));
 app.get('*',             pub('index.html'));
 
-// WebSocket
+// ─────────────────────────────────────────────
+// ERRO GLOBAL — não vaza stack trace em produção
+// ─────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  // Erro de CORS
+  if (err.message?.includes('CORS')) {
+    return res.status(403).json({ erro: 'Acesso não autorizado.' });
+  }
+  console.error('[erro]', err.message);
+  res.status(500).json({
+    erro: process.env.NODE_ENV === 'production'
+      ? 'Erro interno. Tente novamente.'
+      : err.message,
+  });
+});
+
+// ─────────────────────────────────────────────
+// WEBSOCKET
+// ─────────────────────────────────────────────
 socketHdl.registrar(io, salas);
 
+// ─────────────────────────────────────────────
+// LIMPEZA AUTOMÁTICA
+// ─────────────────────────────────────────────
+iniciarLimpeza(salas);
+
+// ─────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`\n🃏 PokerPlanning rodando em http://localhost:${PORT}\n`);
+  console.log(`\n🃏 Pontua Planning v3.0`);
+  console.log(`   → http://localhost:${PORT}`);
+  console.log(`   → Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   → Banco: ${process.env.SUPABASE_URL ? 'Supabase ✓' : 'Memória'}`);
+  console.log(`   → Salas expiram após: ${process.env.HORAS_SALA_ATIVA || 24}h\n`);
 });
