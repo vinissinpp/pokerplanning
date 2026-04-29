@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PokerPlanning — Estimativas ágeis sem complicação</title>
+<title>Pontua — Estimativas ágeis sem complicação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <style>
 :root {
   --c1:#ff4242; --c1d:#cc2e2e; --c1l:#fff0f0;
   --c2:#f4fad2; --c3:#d4ee5e; --c4:#e1edb9; --c5:#f0f2eb;
-  --heart:#2a7a4a;
   --text:#1a1a1a; --textm:#555; --texts:#888;
   --white:#ffffff; --radius:14px; --radius-sm:9px;
 }
@@ -22,381 +21,253 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 nav {
   display:flex; align-items:center; justify-content:space-between;
   padding:1.1rem 3rem; background:var(--c5); position:sticky; top:0; z-index:100;
-  border-bottom:1px solid transparent;
-  transition: border-color .2s, background .2s;
+  border-bottom:1px solid transparent; transition:border-color .2s, background .2s;
 }
 nav.scrolled { background:rgba(240,242,235,.96); border-color:var(--c4); backdrop-filter:blur(8px); }
-.nav-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:17px; display:flex; align-items:center; gap:7px; cursor:pointer; user-select:none; }
-.logo-dot { width:9px; height:9px; border-radius:50%; background:var(--c1); display:inline-block; }
+
+.nav-logo {
+  font-family:'Syne',sans-serif; font-weight:800; font-size:20px;
+  display:flex; align-items:baseline; gap:5px; cursor:pointer; text-decoration:none; color:var(--text);
+}
+.nav-logo .dot { width:9px; height:9px; border-radius:50%; background:var(--c1); display:inline-block; margin-right:2px; }
+.nav-logo .sub { font-size:12px; font-weight:400; color:var(--texts); }
+
 .nav-links { display:flex; align-items:center; gap:8px; }
 .nav-link { font-size:13px; color:var(--textm); text-decoration:none; padding:7px 14px; border-radius:var(--radius-sm); transition:background .15s; cursor:pointer; }
 .nav-link:hover { background:var(--c4); color:var(--text); }
-.nav-btn-login {
+
+/* Nav logado */
+.nav-usuario {
+  display:flex; align-items:center; gap:10px;
+  background:var(--white); border:1.5px solid var(--c4);
+  padding:5px 14px 5px 8px; border-radius:30px; cursor:default;
+}
+.nav-av {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--c1); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700;
+}
+.nav-nome { font-size:13px; font-weight:500; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.btn-sair {
+  background:var(--c5); border:1px solid var(--c4); color:var(--textm);
+  padding:5px 12px; border-radius:20px; font-size:12px; font-family:'DM Sans',sans-serif;
+  cursor:pointer; transition:all .15s;
+}
+.btn-sair:hover { background:var(--c4); }
+
+.btn-nav-login {
   font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500;
   color:var(--text); background:var(--white); border:1.5px solid var(--c4);
-  padding:7px 18px; border-radius:var(--radius-sm); cursor:pointer;
-  transition:all .15s; text-decoration:none;
+  padding:7px 18px; border-radius:var(--radius-sm); cursor:pointer; transition:all .15s; text-decoration:none;
 }
-.nav-btn-login:hover { border-color:#bbc890; background:var(--c2); }
+.btn-nav-login:hover { border-color:#bbc890; background:var(--c2); }
+.btn-cta-primary {
+  background:var(--c1); color:#fff; border:none;
+  padding:9px 20px; border-radius:var(--radius-sm);
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+  box-shadow:0 4px 16px rgba(255,66,66,.25);
+}
+.btn-cta-primary:hover { background:var(--c1d); transform:translateY(-1px); }
 
 /* ── HERO ── */
 .hero {
-  min-height: calc(100vh - 62px);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 4rem;
-  padding: 4rem 3rem 4rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height:calc(100vh - 66px); display:grid; grid-template-columns:1fr 1fr;
+  align-items:center; gap:4rem; padding:4rem 3rem; max-width:1200px; margin:0 auto;
 }
-
 .hero-left { display:flex; flex-direction:column; gap:2rem; }
-
 .hero-badge {
-  display:inline-flex; align-items:center; gap:8px;
-  background:var(--c3); color:#2a3a00;
-  font-size:12px; font-weight:600; letter-spacing:.3px;
-  padding:6px 14px; border-radius:20px;
-  width:fit-content;
-  animation: fadeUp .5s ease both;
+  display:inline-flex; align-items:center; gap:8px; background:var(--c3); color:#2a3a00;
+  font-size:12px; font-weight:600; letter-spacing:.3px; padding:6px 14px; border-radius:20px;
+  width:fit-content; animation:fadeUp .5s ease both;
 }
 .badge-dot { width:6px; height:6px; border-radius:50%; background:#2a7a4a; animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(.8);} }
-
 .hero-title {
-  font-family:'Syne',sans-serif;
-  font-size: clamp(42px, 5.5vw, 70px);
-  font-weight: 800;
-  line-height: 1.05;
-  animation: fadeUp .5s .1s ease both;
+  font-family:'Syne',sans-serif; font-size:clamp(42px,5.5vw,68px); font-weight:800; line-height:1.05;
+  animation:fadeUp .5s .1s ease both;
 }
 .hero-title .accent { color:var(--c1); }
-
-.hero-sub {
-  font-size:16px; color:var(--textm); line-height:1.7; max-width:460px;
-  animation: fadeUp .5s .2s ease both;
+.hero-sub { font-size:16px; color:var(--textm); line-height:1.7; max-width:460px; animation:fadeUp .5s .2s ease both; }
+.hero-ctas { display:flex; align-items:center; gap:12px; flex-wrap:wrap; animation:fadeUp .5s .3s ease both; }
+.btn-hero-p {
+  background:var(--c1); color:#fff; border:none; padding:14px 28px; border-radius:var(--radius-sm);
+  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s;
+  text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  box-shadow:0 4px 20px rgba(255,66,66,.3);
 }
-
-.hero-ctas {
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  animation: fadeUp .5s .3s ease both;
-}
-.btn-cta-primary {
-  background:var(--c1); color:#fff; border:none;
-  padding:14px 28px; border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
-  cursor:pointer; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
-  box-shadow: 0 4px 20px rgba(255,66,66,.3);
-}
-.btn-cta-primary:hover { background:var(--c1d); transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,66,66,.35); }
-.btn-cta-primary:active { transform:translateY(0); }
-.btn-cta-secondary {
+.btn-hero-p:hover { background:var(--c1d); transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,66,66,.35); }
+.btn-hero-s {
   background:var(--white); color:var(--text); border:1.5px solid var(--c4);
   padding:13px 24px; border-radius:var(--radius-sm);
   font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500;
   cursor:pointer; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
 }
-.btn-cta-secondary:hover { border-color:#bbc890; background:var(--c2); transform:translateY(-1px); }
-
-.hero-stats {
-  display:flex; gap:28px; flex-wrap:wrap;
-  padding-top:1rem; border-top:1px solid var(--c4);
-  animation: fadeUp .5s .4s ease both;
-}
+.btn-hero-s:hover { border-color:#bbc890; background:var(--c2); transform:translateY(-1px); }
+.hero-stats { display:flex; gap:28px; flex-wrap:wrap; padding-top:1rem; border-top:1px solid var(--c4); animation:fadeUp .5s .4s ease both; }
 .stat { display:flex; flex-direction:column; gap:2px; }
-.stat-num { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--text); }
+.stat-num { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
 .stat-label { font-size:11px; color:var(--texts); }
 
-/* ── HERO CARD PREVIEW ── */
-.hero-right {
-  display:flex; flex-direction:column; gap:14px;
-  animation: fadeUp .6s .2s ease both;
-}
-
+/* ── PREVIEW ── */
+.hero-right { display:flex; flex-direction:column; gap:14px; animation:fadeUp .6s .2s ease both; }
 .preview-card {
-  background:var(--white); border:1px solid var(--c4);
-  border-radius:var(--radius); padding:1.25rem 1.5rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,.07);
+  background:var(--white); border:1px solid var(--c4); border-radius:var(--radius); padding:1.25rem 1.5rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.07);
 }
 .pc-label { font-size:10px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px; }
 .pc-task-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:3px; }
 .pc-task-sub { font-size:12px; color:var(--textm); margin-bottom:14px; }
-
 .mini-cartas { display:flex; gap:7px; align-items:flex-end; }
 .mini-carta {
-  width:38px; height:53px; border-radius:7px;
-  border:1.5px solid var(--c4); background:var(--white);
+  width:38px; height:53px; border-radius:7px; border:1.5px solid var(--c4); background:var(--white);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
-  color:var(--text); cursor:default; transition:all .2s;
-  position:relative;
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); transition:all .2s;
 }
-.mini-carta.sel {
-  border-color:var(--c1); background:var(--c2); color:var(--c1);
-  transform:translateY(-8px);
-  box-shadow:0 6px 20px rgba(255,66,66,.2);
-}
-
-.pc-participantes { display:flex; align-items:center; gap:10px; }
-.pc-avs { display:flex; gap:-4px; }
-.pc-av {
-  width:32px; height:32px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:10px; font-weight:700; border:2px solid var(--white);
-  margin-left:-6px;
-}
-.pc-av:first-child { margin-left:0; }
+.mini-carta.sel { border-color:var(--c1); background:var(--c2); color:var(--c1); transform:translateY(-8px); box-shadow:0 6px 20px rgba(255,66,66,.2); }
 .pc-online { font-size:11px; font-weight:600; background:var(--c3); color:#2a3a00; padding:3px 10px; border-radius:10px; }
-.pc-status { font-size:12px; color:var(--textm); }
+.pc-av { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; border:2px solid var(--white); margin-left:-6px; }
+.pc-av:first-child { margin-left:0; }
 
 /* ── FEATURES ── */
-.features-section {
-  background:var(--white); padding:5rem 3rem;
-}
+.features-section { background:var(--white); padding:5rem 3rem; }
 .features-inner { max-width:1100px; margin:0 auto; }
-.section-title {
-  font-family:'Syne',sans-serif; font-size:32px; font-weight:800;
-  text-align:center; margin-bottom:.5rem;
-}
+.section-title { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; text-align:center; margin-bottom:.5rem; }
 .section-sub { font-size:15px; color:var(--textm); text-align:center; margin-bottom:3.5rem; }
-
 .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-.feature-card {
-  background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius);
-  padding:1.75rem; transition:all .2s; cursor:default;
-}
+.feature-card { background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius); padding:1.75rem; transition:all .2s; }
 .feature-card:hover { background:var(--c2); border-color:var(--c3); transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.07); }
-.feature-icon {
-  width:44px; height:44px; border-radius:10px;
-  background:var(--c3); display:flex; align-items:center; justify-content:center;
-  font-size:20px; margin-bottom:1rem;
-}
+.feature-icon { width:44px; height:44px; border-radius:10px; background:var(--c3); display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:1rem; }
 .feature-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:.5rem; }
 .feature-desc { font-size:13px; color:var(--textm); line-height:1.65; }
 
-/* ── HOW IT WORKS ── */
+/* ── COMO USAR ── */
 .how-section { padding:5rem 3rem; max-width:1100px; margin:0 auto; }
 .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-top:3rem; }
-.step { display:flex; flex-direction:column; gap:1rem; align-items:flex-start; position:relative; }
-.step:not(:last-child)::after {
-  content:'→'; position:absolute; right:-1.5rem; top:12px;
-  font-size:20px; color:var(--c4);
-}
-.step-num {
-  width:40px; height:40px; border-radius:50%;
-  background:var(--c1); color:#fff;
-  font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0;
-}
+.step { display:flex; flex-direction:column; gap:1rem; position:relative; }
+.step:not(:last-child)::after { content:'→'; position:absolute; right:-1.5rem; top:10px; font-size:20px; color:var(--c4); }
+.step-num { width:40px; height:40px; border-radius:50%; background:var(--c1); color:#fff; font-family:'Syne',sans-serif; font-size:16px; font-weight:800; display:flex; align-items:center; justify-content:center; }
 .step-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; }
 .step-desc { font-size:13px; color:var(--textm); line-height:1.6; }
 
 /* ── CTA BOTTOM ── */
-.cta-section {
-  background:var(--text); color:var(--white);
-  padding:4rem 3rem; text-align:center;
-}
+.cta-section { background:var(--text); color:var(--white); padding:4rem 3rem; text-align:center; }
 .cta-section .section-title { color:var(--white); margin-bottom:.75rem; }
 .cta-section .section-sub { color:#aaa; margin-bottom:2rem; }
 .cta-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-.btn-cta-white {
-  background:var(--white); color:var(--text); border:none;
-  padding:14px 28px; border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
-  cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:8px;
-}
+.btn-cta-white { background:var(--white); color:var(--text); border:none; padding:14px 28px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:8px; }
 .btn-cta-white:hover { background:var(--c3); transform:translateY(-2px); }
-.btn-cta-outline {
-  background:transparent; color:var(--white); border:1.5px solid rgba(255,255,255,.3);
-  padding:13px 24px; border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500;
-  cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:8px;
-}
+.btn-cta-outline { background:transparent; color:var(--white); border:1.5px solid rgba(255,255,255,.3); padding:13px 24px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500; cursor:pointer; transition:all .2s; }
 .btn-cta-outline:hover { border-color:rgba(255,255,255,.6); background:rgba(255,255,255,.08); }
 
 /* ── FOOTER ── */
-footer {
-  background:var(--text); border-top:1px solid rgba(255,255,255,.08);
-  padding:1.5rem 3rem; display:flex; align-items:center; justify-content:space-between;
-  flex-wrap:wrap; gap:12px;
-}
-.footer-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:15px; color:var(--white); display:flex; align-items:center; gap:7px; }
+footer { background:var(--text); border-top:1px solid rgba(255,255,255,.08); padding:1.5rem 3rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.footer-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:16px; color:var(--white); display:flex; align-items:baseline; gap:5px; }
+.footer-logo .dot { width:8px; height:8px; border-radius:50%; background:var(--c1); display:inline-block; margin-right:2px; }
+.footer-logo .sub { font-size:11px; font-weight:400; color:#555; }
 .footer-copy { font-size:12px; color:#666; }
 .footer-links { display:flex; gap:16px; }
 .footer-link { font-size:12px; color:#666; text-decoration:none; }
 .footer-link:hover { color:#aaa; }
 
 /* ── MODAL ── */
-.overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,.35); z-index:200;
-  align-items:center; justify-content:center;
-  backdrop-filter:blur(4px);
-}
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
 .overlay.ativo { display:flex; }
-.modal {
-  background:var(--white); border-radius:var(--radius); padding:2.25rem;
-  width:100%; max-width:420px; margin:1rem;
-  animation:fadeUp .25s ease both;
-  box-shadow:0 24px 64px rgba(0,0,0,.18);
-}
-.modal-close {
-  position:absolute; top:1rem; right:1rem;
-  background:var(--c5); border:1px solid var(--c4); border-radius:50%;
-  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
-  cursor:pointer; font-size:16px; color:var(--textm); position:relative;
-}
-.modal-close:hover { background:var(--c4); }
+.modal { background:var(--white); border-radius:var(--radius); padding:2.25rem; width:100%; max-width:420px; margin:1rem; animation:fadeUp .25s ease both; box-shadow:0 24px 64px rgba(0,0,0,.18); }
 .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
-.modal h3 { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; }
+.modal-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:18px; display:flex; align-items:baseline; gap:5px; }
+.modal-logo .dot { width:8px; height:8px; border-radius:50%; background:var(--c1); display:inline-block; margin-right:2px; }
+.modal-logo .sub { font-size:11px; font-weight:400; color:var(--texts); }
+.modal-close { background:var(--c5); border:1px solid var(--c4); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:var(--textm); }
+.modal-close:hover { background:var(--c4); }
 .modal-tabs { display:flex; gap:4px; background:var(--c5); padding:4px; border-radius:var(--radius-sm); margin-bottom:1.5rem; }
-.modal-tab {
-  flex:1; padding:8px; border-radius:6px; border:none;
-  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
-  cursor:pointer; background:transparent; color:var(--textm); transition:all .15s;
-}
+.modal-tab { flex:1; padding:8px; border-radius:6px; border:none; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; background:transparent; color:var(--textm); transition:all .15s; }
 .modal-tab.ativo { background:var(--white); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.1); }
 .tab-content { display:none; }
 .tab-content.ativo { display:block; }
-
 .field { margin-bottom:1rem; }
 .field label { display:block; font-size:11px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
-.field input {
-  width:100%; padding:10px 14px; border:1.5px solid var(--c4); border-radius:var(--radius-sm);
-  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--c5); outline:none;
-  transition:border-color .15s, background .15s;
-}
+.field input { width:100%; padding:10px 14px; border:1.5px solid var(--c4); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--c5); outline:none; transition:all .15s; }
 .field input:focus { border-color:var(--c1); background:var(--white); }
-.modal-hint { font-size:12px; color:var(--texts); margin-bottom:1rem; line-height:1.5; }
 .btn-modal { background:var(--c1); color:#fff; border:none; width:100%; padding:12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all .15s; margin-top:4px; }
 .btn-modal:hover { background:var(--c1d); }
 .erro-msg { font-size:12px; color:var(--c1); min-height:16px; margin-top:6px; }
-.or-divider { display:flex; align-items:center; gap:10px; margin:1rem 0; }
-.or-divider span { font-size:11px; color:var(--texts); white-space:nowrap; }
-.or-divider::before,.or-divider::after { content:''; flex:1; height:1px; background:var(--c4); }
-.sala-info-box {
-  background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm);
-  padding:10px 14px; margin-bottom:1rem; font-size:13px; color:#2a3a00;
-  display:none;
-}
+.sala-info-box { background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:1rem; font-size:13px; color:#2a3a00; display:none; }
 .sala-info-box.visivel { display:block; }
 
 @keyframes fadeUp { from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
 
-/* ── RESPONSIVE ── */
-@media(max-width:900px) {
-  .hero { grid-template-columns:1fr; gap:2.5rem; padding:2.5rem 1.5rem; min-height:auto; padding-top:3rem; }
-  .features-grid { grid-template-columns:1fr; }
-  .steps { grid-template-columns:1fr; }
-  .step:not(:last-child)::after { display:none; }
-  nav { padding:1rem 1.5rem; }
-  .features-section, .how-section { padding:3.5rem 1.5rem; }
-  .cta-section { padding:3.5rem 1.5rem; }
-  footer { padding:1.25rem 1.5rem; flex-direction:column; text-align:center; }
-}
-@media(max-width:600px) {
-  .hero-title { font-size:38px; }
-  .hero-ctas { flex-direction:column; }
-  .btn-cta-primary, .btn-cta-secondary { width:100%; justify-content:center; }
-  .features-grid { grid-template-columns:1fr; }
-  nav .nav-links .nav-link { display:none; }
-}
+@media(max-width:900px) { .hero{ grid-template-columns:1fr; gap:2.5rem; padding:2.5rem 1.5rem; min-height:auto; } .features-grid{ grid-template-columns:1fr; } .steps{ grid-template-columns:1fr; } .step:not(:last-child)::after{ display:none; } nav{ padding:1rem 1.5rem; } .features-section,.how-section,.cta-section{ padding:3.5rem 1.5rem; } footer{ padding:1.25rem 1.5rem; flex-direction:column; text-align:center; } }
+@media(max-width:600px) { .hero-title{ font-size:38px; } .hero-ctas{ flex-direction:column; } .btn-hero-p,.btn-hero-s{ width:100%; justify-content:center; } }
 </style>
 </head>
 <body>
 
 <!-- ══ NAV ══ -->
 <nav id="nav">
-  <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-    <span class="logo-dot"></span>PokerPlanning
-  </div>
+  <a class="nav-logo" href="/">
+    <span class="dot"></span>Pontua
+    <span class="sub">planning</span>
+  </a>
   <div class="nav-links">
     <a class="nav-link" href="#como-usar">Como usar</a>
     <a class="nav-link" href="#features">Recursos</a>
-    <a class="nav-link" href="/cadastro" class="nav-btn-login">Entrar</a>
-    <button class="btn-cta-primary" style="padding:8px 18px;font-size:13px;" onclick="abrirModal('criar')">Criar sala grátis</button>
+    <div id="nav-deslogado" style="display:flex;align-items:center;gap:8px;">
+      <a class="btn-nav-login" href="/cadastro">Entrar</a>
+      <button class="btn-cta-primary" onclick="abrirModal('criar')">Criar sala grátis</button>
+    </div>
+    <div id="nav-logado" style="display:none;align-items:center;gap:8px;">
+      <div class="nav-usuario">
+        <div class="nav-av" id="nav-av">?</div>
+        <span class="nav-nome" id="nav-nome">—</span>
+      </div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+      <button class="btn-cta-primary" onclick="abrirModal('criar')">+ Nova sala</button>
+    </div>
   </div>
 </nav>
 
 <!-- ══ HERO ══ -->
 <section class="hero">
   <div class="hero-left">
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      100% gratuito · em português
-    </div>
-
-    <h1 class="hero-title">
-      Estimativas<br>
-      ágeis <span class="accent">sem</span><br>
-      <span class="accent">complicação</span>
-    </h1>
-
-    <p class="hero-sub">
-      Crie uma sala em segundos, convide seu time e vote em story points em tempo real. Sem login, sem burocracia.
-    </p>
-
+    <div class="hero-badge"><span class="badge-dot"></span>100% gratuito · em português</div>
+    <h1 class="hero-title">Estimativas<br>ágeis <span class="accent">sem</span><br><span class="accent">complicação</span></h1>
+    <p class="hero-sub">Crie uma sala em segundos, convide seu time e vote em story points em tempo real. Sem burocracia.</p>
     <div class="hero-ctas">
-      <button class="btn-cta-primary" onclick="abrirModal('criar')">
-        🃏 Criar nova sala
-      </button>
-      <button class="btn-cta-secondary" onclick="abrirModal('entrar')">
-        Entrar em uma sala
-      </button>
+      <button class="btn-hero-p" onclick="abrirModal('criar')">🃏 Criar nova sala</button>
+      <button class="btn-hero-s" onclick="abrirModal('entrar')">Entrar em uma sala</button>
     </div>
-
     <div class="hero-stats">
-      <div class="stat">
-        <span class="stat-num">100%</span>
-        <span class="stat-label">gratuito agora</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num">∞</span>
-        <span class="stat-label">participantes por sala</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num">&lt;5s</span>
-        <span class="stat-label">para criar uma sala</span>
-      </div>
+      <div class="stat"><span class="stat-num">100%</span><span class="stat-label">gratuito agora</span></div>
+      <div class="stat"><span class="stat-num">∞</span><span class="stat-label">participantes por sala</span></div>
+      <div class="stat"><span class="stat-num">&lt;5s</span><span class="stat-label">para criar uma sala</span></div>
     </div>
   </div>
-
   <div class="hero-right">
-    <!-- Preview: Tarefa ativa + cartas -->
     <div class="preview-card">
       <div class="pc-label">Tarefa ativa</div>
       <div class="pc-task-name">Integração com API de pagamentos</div>
       <div class="pc-task-sub">Conectar Stripe com webhook de confirmação</div>
       <div class="mini-cartas">
-        <div class="mini-carta">1</div>
-        <div class="mini-carta">2</div>
-        <div class="mini-carta">3</div>
-        <div class="mini-carta">5</div>
-        <div class="mini-carta">8</div>
-        <div class="mini-carta">13</div>
-        <div class="mini-carta sel">21</div>
-        <div class="mini-carta">?</div>
+        <div class="mini-carta">1</div><div class="mini-carta">2</div><div class="mini-carta">3</div>
+        <div class="mini-carta">5</div><div class="mini-carta">8</div><div class="mini-carta">13</div>
+        <div class="mini-carta sel">21</div><div class="mini-carta">?</div>
       </div>
     </div>
-
-    <!-- Preview: Participantes -->
     <div class="preview-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div class="pc-label" style="margin:0">Participantes</div>
         <div class="pc-online">4 online</div>
       </div>
-      <div class="pc-participantes" style="flex-direction:column;align-items:flex-start;gap:10px;">
-        <div style="display:flex;align-items:center;gap:10px;width:100%">
-          <div class="pc-avs">
-            <div class="pc-av" style="background:#d4ee5e;color:#2a3a00;">AB</div>
-            <div class="pc-av" style="background:#ff4242;color:#fff;">CR</div>
-            <div class="pc-av" style="background:#f4fad2;color:#444;">FM</div>
-            <div class="pc-av" style="background:#e1edb9;color:#2a3a00;">JL</div>
-          </div>
-          <div class="pc-status" style="font-size:12px;color:#2a7a4a;font-weight:500;">todos votaram ✓</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;">
+          <div class="pc-av" style="background:#d4ee5e;color:#2a3a00;">AB</div>
+          <div class="pc-av" style="background:#ff4242;color:#fff;">CR</div>
+          <div class="pc-av" style="background:#f4fad2;color:#444;">FM</div>
+          <div class="pc-av" style="background:#e1edb9;color:#2a3a00;">JL</div>
         </div>
+        <div style="font-size:12px;color:#2a7a4a;font-weight:500;">todos votaram ✓</div>
       </div>
     </div>
   </div>
@@ -408,60 +279,24 @@ footer {
     <h2 class="section-title">Tudo que seu time precisa</h2>
     <p class="section-sub">Ferramentas simples para sprints mais eficientes</p>
     <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-title">Tempo real</div>
-        <div class="feature-desc">Votos sincronizados instantaneamente com WebSocket. Todos veem o mesmo estado da sala.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📋</div>
-        <div class="feature-title">Importar tarefas</div>
-        <div class="feature-desc">Suba uma planilha CSV ou XLSX e todas as tarefas aparecem automaticamente na sala.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <div class="feature-title">Métricas da sprint</div>
-        <div class="feature-desc">Veja a soma de story points por colaborador, médias do time e histórico completo.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🃏</div>
-        <div class="feature-title">Sequência Fibonacci</div>
-        <div class="feature-desc">Cartas 1, 2, 3, 5, 8, 13, 21 e ? — o padrão que times ágeis já conhecem.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔗</div>
-        <div class="feature-title">Link para convidar</div>
-        <div class="feature-desc">Compartilhe o link da sala com um clique. Ninguém precisa criar conta para participar.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🛡️</div>
-        <div class="feature-title">Sem distração</div>
-        <div class="feature-desc">Interface limpa e focada. Sem anúncios, sem popups, sem ruído visual.</div>
-      </div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Tempo real</div><div class="feature-desc">Votos sincronizados instantaneamente com WebSocket. Todos veem o mesmo estado da sala.</div></div>
+      <div class="feature-card"><div class="feature-icon">📋</div><div class="feature-title">Importar tarefas</div><div class="feature-desc">Suba uma planilha CSV ou XLSX e todas as tarefas aparecem automaticamente na sala.</div></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Métricas da sprint</div><div class="feature-desc">Veja a soma de story points por colaborador, médias do time e histórico completo.</div></div>
+      <div class="feature-card"><div class="feature-icon">🃏</div><div class="feature-title">Sequência Fibonacci</div><div class="feature-desc">Cartas 1, 2, 3, 5, 8, 13, 21 e ? — o padrão que times ágeis já conhecem.</div></div>
+      <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">Link para convidar</div><div class="feature-desc">Compartilhe o link da sala com um clique. Ninguém precisa criar conta para participar.</div></div>
+      <div class="feature-card"><div class="feature-icon">🛡️</div><div class="feature-title">Sem distração</div><div class="feature-desc">Interface limpa e focada. Sem anúncios, sem popups, sem ruído visual.</div></div>
     </div>
   </div>
 </section>
 
-<!-- ══ HOW IT WORKS ══ -->
+<!-- ══ COMO USAR ══ -->
 <section class="how-section" id="como-usar">
   <h2 class="section-title">Como funciona</h2>
   <p class="section-sub">Três passos para começar sua estimativa</p>
   <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-title">Crie a sala</div>
-      <div class="step-desc">Clique em "Criar nova sala", dê um nome e copie o link gerado automaticamente.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-title">Convide o time</div>
-      <div class="step-desc">Compartilhe o link no Slack, Teams ou onde preferir. Todos entram com apenas um nome.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-title">Vote e revele</div>
-      <div class="step-desc">Cada um escolhe sua carta. Clique em "Revelar" para ver todos os votos e a média calculada.</div>
-    </div>
+    <div class="step"><div class="step-num">1</div><div class="step-title">Crie a sala</div><div class="step-desc">Clique em "Criar nova sala", dê um nome e copie o link gerado automaticamente.</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-title">Convide o time</div><div class="step-desc">Compartilhe o link no Slack, Teams ou onde preferir. Todos entram com apenas um nome.</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-title">Vote e revele</div><div class="step-desc">Cada um escolhe sua carta. Clique em "Revelar" para ver todos os votos e a média calculada.</div></div>
   </div>
 </section>
 
@@ -477,8 +312,8 @@ footer {
 
 <!-- ══ FOOTER ══ -->
 <footer>
-  <div class="footer-logo"><span class="logo-dot"></span>PokerPlanning</div>
-  <div class="footer-copy">© 2025 PokerPlanning. Feito para times ágeis.</div>
+  <div class="footer-logo"><span class="dot"></span>Pontua<span class="sub">planning</span></div>
+  <div class="footer-copy">© 2025 Pontua Planning. Feito para times ágeis.</div>
   <div class="footer-links">
     <a class="footer-link" href="#">Privacidade</a>
     <a class="footer-link" href="#">Termos</a>
@@ -488,42 +323,25 @@ footer {
 
 <!-- ══ MODAL CRIAR / ENTRAR ══ -->
 <div class="overlay" id="modal-sala">
-  <div class="modal" style="position:relative;">
+  <div class="modal">
     <div class="modal-header">
-      <div class="nav-logo"><span class="logo-dot"></span>PokerPlanning</div>
+      <div class="modal-logo"><span class="dot"></span>Pontua<span class="sub">planning</span></div>
       <button class="modal-close" onclick="fecharModal()">✕</button>
     </div>
-
     <div class="modal-tabs">
       <button class="modal-tab ativo" id="tab-criar" onclick="mudarTab('criar')">Criar sala</button>
       <button class="modal-tab" id="tab-entrar" onclick="mudarTab('entrar')">Entrar em sala</button>
     </div>
-
-    <!-- TAB CRIAR -->
     <div class="tab-content ativo" id="tc-criar">
-      <div class="field">
-        <label>Nome da sala</label>
-        <input type="text" id="criar-nome-sala" placeholder="Ex: Sprint 42 — Time Alpha" maxlength="60" />
-      </div>
-      <div class="field">
-        <label>Seu nome</label>
-        <input type="text" id="criar-nome" placeholder="Ex: Ana Lima" maxlength="30" />
-      </div>
+      <div class="field"><label>Nome da sala</label><input type="text" id="criar-nome-sala" placeholder="Ex: Sprint 42 — Time Alpha" maxlength="60"/></div>
+      <div class="field"><label>Seu nome</label><input type="text" id="criar-nome" placeholder="Ex: Ana Lima" maxlength="30"/></div>
       <div class="erro-msg" id="criar-erro"></div>
       <button class="btn-modal" onclick="criarSala()">Criar sala agora →</button>
     </div>
-
-    <!-- TAB ENTRAR -->
     <div class="tab-content" id="tc-entrar">
       <div class="sala-info-box" id="sala-info">Sala encontrada! Informe seu nome para entrar.</div>
-      <div class="field">
-        <label>Código ou link da sala</label>
-        <input type="text" id="entrar-codigo" placeholder="Cole o link ou código" maxlength="200" oninput="verificarSala(this.value)" />
-      </div>
-      <div class="field">
-        <label>Seu nome</label>
-        <input type="text" id="entrar-nome" placeholder="Ex: Carlos Mendes" maxlength="30" />
-      </div>
+      <div class="field"><label>Código ou link da sala</label><input type="text" id="entrar-codigo" placeholder="Cole o link ou código" maxlength="200" oninput="verificarSala(this.value)"/></div>
+      <div class="field"><label>Seu nome</label><input type="text" id="entrar-nome" placeholder="Ex: Carlos Mendes" maxlength="30"/></div>
       <div class="erro-msg" id="entrar-erro"></div>
       <button class="btn-modal" onclick="entrarSala()">Entrar na sala →</button>
     </div>
@@ -531,10 +349,41 @@ footer {
 </div>
 
 <script>
+// ── SESSÃO ──
+function getUsuario() {
+  try { return JSON.parse(localStorage.getItem('pontua_usuario')); } catch { return null; }
+}
+function getToken() { return localStorage.getItem('pontua_token'); }
+
+function renderNav() {
+  const usuario = getUsuario();
+  const token   = getToken();
+  if (usuario && token) {
+    document.getElementById('nav-deslogado').style.display = 'none';
+    document.getElementById('nav-logado').style.display    = 'flex';
+    const ini = usuario.nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('nav-av').textContent   = ini;
+    document.getElementById('nav-nome').textContent = usuario.nome.split(' ')[0];
+    // Preenche nome no modal criar sala automaticamente
+    document.getElementById('criar-nome').value = usuario.nome;
+  } else {
+    document.getElementById('nav-deslogado').style.display = 'flex';
+    document.getElementById('nav-logado').style.display    = 'none';
+  }
+}
+
+function sair() {
+  localStorage.removeItem('pontua_token');
+  localStorage.removeItem('pontua_usuario');
+  renderNav();
+}
+
+// ── NAV SCROLL ──
 window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 30);
 });
 
+// ── MODAL ──
 function abrirModal(tab) {
   document.getElementById('modal-sala').classList.add('ativo');
   mudarTab(tab);
@@ -555,24 +404,28 @@ function mudarTab(tab) {
 
 async function criarSala() {
   const nomeSala = document.getElementById('criar-nome-sala').value.trim();
-  const nome = document.getElementById('criar-nome').value.trim();
-  if (!nome) { document.getElementById('criar-erro').textContent = 'Informe seu nome.'; return; }
-  const err = document.getElementById('criar-erro');
+  const nome     = document.getElementById('criar-nome').value.trim();
+  const err      = document.getElementById('criar-erro');
   err.textContent = '';
+  if (!nome) return err.textContent = 'Informe seu nome.';
+
+  const headers = { 'Content-Type': 'application/json' };
+  const token   = getToken();
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+
   try {
-    const res = await fetch('/api/sala', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ nome: nomeSala || 'Minha sala' }) });
+    const res  = await fetch('/api/sala', { method:'POST', headers, body: JSON.stringify({ nome: nomeSala || 'Minha sala' }) });
     const data = await res.json();
     if (data.id) {
       window.location.href = `/sala/${data.id}?nome=${encodeURIComponent(nome)}`;
-    } else { err.textContent = 'Erro ao criar sala. Tente novamente.'; }
+    } else { err.textContent = 'Erro ao criar sala.'; }
   } catch { err.textContent = 'Erro de conexão.'; }
 }
 
 function extrairId(valor) {
   if (!valor) return '';
   const match = valor.match(/sala\/([a-zA-Z0-9\-]+)/);
-  if (match) return match[1];
-  return valor.trim();
+  return match ? match[1] : valor.trim();
 }
 
 let verificarTimeout;
@@ -583,41 +436,38 @@ function verificarSala(valor) {
   verificarTimeout = setTimeout(async () => {
     try {
       const res = await fetch(`/api/sala/${id}`);
-      if (res.ok) { document.getElementById('sala-info').classList.add('visivel'); document.getElementById('entrar-erro').textContent = ''; }
-      else { document.getElementById('sala-info').classList.remove('visivel'); }
+      if (res.ok) document.getElementById('sala-info').classList.add('visivel');
+      else document.getElementById('sala-info').classList.remove('visivel');
     } catch {}
   }, 400);
 }
 
 function entrarSala() {
   const codigo = document.getElementById('entrar-codigo').value.trim();
-  const nome = document.getElementById('entrar-nome').value.trim();
-  const id = extrairId(codigo);
-  if (!id) { document.getElementById('entrar-erro').textContent = 'Informe o código ou link da sala.'; return; }
-  if (!nome) { document.getElementById('entrar-erro').textContent = 'Informe seu nome.'; return; }
+  const nome   = document.getElementById('entrar-nome').value.trim();
+  const id     = extrairId(codigo);
+  if (!id)   return document.getElementById('entrar-erro').textContent = 'Informe o código ou link da sala.';
+  if (!nome) return document.getElementById('entrar-erro').textContent = 'Informe seu nome.';
   window.location.href = `/sala/${id}?nome=${encodeURIComponent(nome)}`;
 }
 
-// Enter nos inputs
 ['criar-nome-sala','criar-nome'].forEach(id => document.getElementById(id).addEventListener('keydown', e => e.key === 'Enter' && criarSala()));
 ['entrar-codigo','entrar-nome'].forEach(id => document.getElementById(id).addEventListener('keydown', e => e.key === 'Enter' && entrarSala()));
 
-// Animação ao scroll
+// Animação scroll
 const obs = new IntersectionObserver(entries => entries.forEach(e => {
   if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
 }), { threshold:.1 });
 document.querySelectorAll('.feature-card, .step').forEach(el => {
-  el.style.opacity='0'; el.style.transform='translateY(20px)'; el.style.transition='all .5s ease';
-  obs.observe(el);
+  el.style.opacity='0'; el.style.transform='translateY(20px)'; el.style.transition='all .5s ease'; obs.observe(el);
 });
 
-// Animação das cartas no hero
+// Animação cartas
 const cartas = document.querySelectorAll('.mini-carta');
-setInterval(() => {
-  cartas.forEach(c => c.classList.remove('sel'));
-  const r = Math.floor(Math.random() * cartas.length);
-  cartas[r].classList.add('sel');
-}, 2000);
+setInterval(() => { cartas.forEach(c => c.classList.remove('sel')); cartas[Math.floor(Math.random()*cartas.length)].classList.add('sel'); }, 2000);
+
+// Init
+renderNav();
 </script>
 </body>
 </html>
