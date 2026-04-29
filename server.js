@@ -1,6 +1,6 @@
 /**
- * server.js — Pontua Planning v3.0
- * Express + Socket.io + JWT + Supabase + Segurança
+ * server.js — Pontua Planning v4.0
+ * Express + Socket.io + JWT + Supabase + Segurança + Pagamento
  */
 
 require('dotenv').config();
@@ -11,13 +11,14 @@ const { Server } = require('socket.io');
 const path       = require('path');
 
 const { corsConfig, helmetConfig, sanitizarBody, bloquearPayloadGrande } = require('./middleware/seguranca');
-const { geral }      = require('./middleware/rateLimit');
+const { geral }          = require('./middleware/rateLimit');
 const { iniciarLimpeza } = require('./middleware/limpeza');
 
-const rotasAuth  = require('./routes/auth');
-const rotasSala  = require('./routes/sala');
-const salaCtrl   = require('./controllers/salaController');
-const socketHdl  = require('./socket/handlers');
+const rotasAuth     = require('./routes/auth');
+const rotasSala     = require('./routes/sala');
+const rotasPagamento = require('./routes/pagamento');
+const salaCtrl      = require('./controllers/salaController');
+const socketHdl     = require('./socket/handlers');
 
 // ─────────────────────────────────────────────
 // ESTADO EM MEMÓRIA
@@ -39,10 +40,10 @@ const io     = new Server(server, {
     ].filter(Boolean),
     methods: ['GET', 'POST'],
   },
-  transports:   ['websocket', 'polling'],
-  pingTimeout:  60000,
-  pingInterval: 25000,
-  maxHttpBufferSize: 1e6, // 1MB max por mensagem WebSocket
+  transports:        ['websocket', 'polling'],
+  pingTimeout:       60000,
+  pingInterval:      25000,
+  maxHttpBufferSize: 1e6,
 });
 
 // ─────────────────────────────────────────────
@@ -56,15 +57,14 @@ app.use(bloquearPayloadGrande);
 app.use(sanitizarBody);
 app.use(geral);
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Remove header que revela tecnologia usada
 app.disable('x-powered-by');
 
 // ─────────────────────────────────────────────
 // ROTAS API
 // ─────────────────────────────────────────────
-app.use('/api/auth', rotasAuth);
-app.use('/api/sala', rotasSala);
+app.use('/api/auth',     rotasAuth);
+app.use('/api/sala',     rotasSala);
+app.use('/api/pagamento', rotasPagamento);
 
 app.get('/api/metricas/:salaId', (req, res) => {
   const sala = salas[req.params.salaId];
@@ -77,7 +77,6 @@ app.get('/api/metricas/:salaId', (req, res) => {
   });
 });
 
-// Health check — sem dados sensíveis
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: Math.floor(process.uptime()) });
 });
@@ -91,14 +90,14 @@ const pub = (file) => (req, res) =>
 app.get('/sala/:id',     pub('sala.html'));
 app.get('/cadastro',     pub('cadastro.html'));
 app.get('/login',        pub('cadastro.html'));
+app.get('/planos',       pub('planos.html'));
 app.get('/metricas/:id', pub('sala.html'));
 app.get('*',             pub('index.html'));
 
 // ─────────────────────────────────────────────
-// ERRO GLOBAL — não vaza stack trace em produção
+// ERRO GLOBAL
 // ─────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  // Erro de CORS
   if (err.message?.includes('CORS')) {
     return res.status(403).json({ erro: 'Acesso não autorizado.' });
   }
@@ -111,13 +110,9 @@ app.use((err, req, res, next) => {
 });
 
 // ─────────────────────────────────────────────
-// WEBSOCKET
+// WEBSOCKET + LIMPEZA
 // ─────────────────────────────────────────────
 socketHdl.registrar(io, salas);
-
-// ─────────────────────────────────────────────
-// LIMPEZA AUTOMÁTICA
-// ─────────────────────────────────────────────
 iniciarLimpeza(salas);
 
 // ─────────────────────────────────────────────
@@ -125,9 +120,10 @@ iniciarLimpeza(salas);
 // ─────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`\n🃏 Pontua Planning v3.0`);
+  console.log(`\n🃏 Pontua Planning v4.0`);
   console.log(`   → http://localhost:${PORT}`);
-  console.log(`   → Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   → Banco: ${process.env.SUPABASE_URL ? 'Supabase ✓' : 'Memória'}`);
+  console.log(`   → Ambiente:  ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   → Banco:     ${process.env.SUPABASE_URL ? 'Supabase ✓' : 'Memória'}`);
+  console.log(`   → Pagamento: ${process.env.MP_ACCESS_TOKEN ? 'Mercado Pago ✓' : 'não configurado'}`);
   console.log(`   → Salas expiram após: ${process.env.HORAS_SALA_ATIVA || 24}h\n`);
 });

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pontua — Planos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --c1:#ff4242;--c1d:#cc2e2e;--c2:#f4fad2;--c3:#d4ee5e;--c4:#e1edb9;--c5:#f0f2eb;
+  --text:#1a1a1a;--textm:#555;--texts:#888;--white:#fff;--radius:14px;--radius-sm:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--c5);color:var(--text);min-height:100vh;}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3rem;background:var(--white);border-bottom:1px solid var(--c4);}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;display:flex;align-items:baseline;gap:5px;text-decoration:none;color:var(--text);}
+.nav-logo .dot{width:9px;height:9px;border-radius:50%;background:var(--c1);display:inline-block;margin-right:2px;}
+.nav-logo .sub{font-size:12px;font-weight:400;color:var(--texts);}
+.btn-nav{background:var(--c5);border:1px solid var(--c4);padding:7px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--textm);text-decoration:none;}
+.btn-nav:hover{background:var(--c4);}
+
+.hero{text-align:center;padding:4rem 2rem 2rem;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,4vw,48px);font-weight:800;margin-bottom:.75rem;}
+.hero p{font-size:16px;color:var(--textm);max-width:480px;margin:0 auto;}
+
+/* Status banner */
+.status-banner{max-width:500px;margin:1.5rem auto;padding:12px 20px;border-radius:var(--radius-sm);font-size:14px;text-align:center;display:none;}
+.status-banner.sucesso{background:var(--c2);border:1px solid var(--c3);color:#2a3a00;display:block;}
+.status-banner.erro{background:#fff3f3;border:1px solid #ffb3b3;color:var(--c1);display:block;}
+
+.planos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:820px;margin:2rem auto 4rem;padding:0 2rem;}
+
+.plano-card{background:var(--white);border:2px solid var(--c4);border-radius:var(--radius);padding:2rem;position:relative;transition:all .2s;}
+.plano-card.destaque{border-color:var(--c1);box-shadow:0 8px 32px rgba(255,66,66,.12);}
+.plano-card.destaque::before{content:'Mais popular';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--c1);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap;}
+
+.plano-nome{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:.25rem;}
+.plano-preco{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--text);line-height:1;margin:.75rem 0 .25rem;}
+.plano-preco span{font-size:16px;font-weight:400;color:var(--textm);}
+.plano-preco-sub{font-size:13px;color:var(--textm);margin-bottom:1.5rem;}
+.plano-free-txt{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--c3);margin:.75rem 0 .25rem;}
+
+.plano-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;}
+.plano-features li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--textm);}
+.plano-features li::before{content:'✓';width:20px;height:20px;border-radius:50%;background:var(--c3);color:#2a3a00;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.plano-features li.nao{color:#bbb;}
+.plano-features li.nao::before{content:'×';background:var(--c5);color:#ccc;}
+
+.btn-plano{width:100%;padding:13px;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-plano.primario{background:var(--c1);color:#fff;box-shadow:0 4px 16px rgba(255,66,66,.25);}
+.btn-plano.primario:hover{background:var(--c1d);transform:translateY(-1px);}
+.btn-plano.secundario{background:var(--c5);color:var(--text);border:1.5px solid var(--c4);}
+.btn-plano.secundario:hover{background:var(--c4);}
+.btn-plano:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
+
+.plano-atual{font-size:12px;color:#2a7a4a;font-weight:600;text-align:center;margin-top:10px;}
+
+.faq{max-width:640px;margin:0 auto 4rem;padding:0 2rem;}
+.faq h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;text-align:center;margin-bottom:1.5rem;}
+.faq-item{background:var(--white);border:1px solid var(--c4);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-bottom:8px;}
+.faq-item h3{font-size:14px;font-weight:600;margin-bottom:.4rem;}
+.faq-item p{font-size:13px;color:var(--textm);line-height:1.6;}
+
+.cancelar-wrap{text-align:center;margin-bottom:3rem;}
+.btn-cancelar{background:none;border:none;color:var(--textm);font-size:13px;cursor:pointer;text-decoration:underline;}
+.btn-cancelar:hover{color:var(--c1);}
+
+.loading{opacity:.6;pointer-events:none;}
+
+@media(max-width:640px){.planos-grid{grid-template-columns:1fr;}.hero{padding:2rem 1.5rem 1rem;}.planos-grid{padding:0 1.5rem;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/"><span class="dot"></span>Pontua<span class="sub">planning</span></a>
+  <a class="btn-nav" href="/">← Voltar</a>
+</nav>
+
+<div class="hero">
+  <h1>Planos simples e transparentes</h1>
+  <p>Comece grátis. Faça upgrade quando seu time crescer.</p>
+</div>
+
+<div id="status-banner" class="status-banner"></div>
+
+<div class="planos-grid">
+
+  <!-- FREE -->
+  <div class="plano-card" id="card-free">
+    <div class="plano-nome">Free</div>
+    <div class="plano-free-txt">Grátis</div>
+    <div class="plano-preco-sub">para sempre</div>
+    <ul class="plano-features">
+      <li>Até 3 salas ativas</li>
+      <li>Até 5 participantes por sala</li>
+      <li>Até 20 tarefas por sala</li>
+      <li>Histórico da sessão</li>
+      <li class="nao">Histórico permanente</li>
+      <li class="nao">Suporte prioritário</li>
+    </ul>
+    <button class="btn-plano secundario" id="btn-free" onclick="usarFree()">Usar grátis</button>
+    <div class="plano-atual" id="atual-free" style="display:none;">✓ Seu plano atual</div>
+  </div>
+
+  <!-- PRO -->
+  <div class="plano-card destaque" id="card-pro">
+    <div class="plano-nome">Pro</div>
+    <div class="plano-preco">R$ 29<span>,90/mês</span></div>
+    <div class="plano-preco-sub">cobrado mensalmente · cancele quando quiser</div>
+    <ul class="plano-features">
+      <li>Salas ilimitadas</li>
+      <li>Participantes ilimitados</li>
+      <li>Tarefas ilimitadas</li>
+      <li>Histórico permanente</li>
+      <li>Suporte prioritário</li>
+    </ul>
+    <button class="btn-plano primario" id="btn-pro" onclick="assinarPro()">Assinar Pro →</button>
+    <div class="plano-atual" id="atual-pro" style="display:none;">✓ Seu plano atual</div>
+  </div>
+
+</div>
+
+<div class="cancelar-wrap" id="cancelar-wrap" style="display:none;">
+  <button class="btn-cancelar" onclick="cancelarAssinatura()">Cancelar assinatura</button>
+</div>
+
+<div class="faq">
+  <h2>Perguntas frequentes</h2>
+  <div class="faq-item">
+    <h3>Posso cancelar quando quiser?</h3>
+    <p>Sim. O cancelamento é imediato e você volta para o plano Free automaticamente. Não há multa nem fidelidade.</p>
+  </div>
+  <div class="faq-item">
+    <h3>O pagamento é seguro?</h3>
+    <p>Sim. O pagamento é processado pelo Mercado Pago — não armazenamos nenhum dado do seu cartão.</p>
+  </div>
+  <div class="faq-item">
+    <h3>O que acontece com minhas salas se eu cancelar?</h3>
+    <p>Suas salas e histórico são mantidos. Apenas novas salas ficam limitadas ao plano Free.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Preciso de cartão de crédito para o Free?</h3>
+    <p>Não. O plano Free é gratuito para sempre e não exige nenhum dado de pagamento.</p>
+  </div>
+</div>
+
+<script>
+function getToken()   { return localStorage.getItem('pontua_token'); }
+function getUsuario() { try { return JSON.parse(localStorage.getItem('pontua_usuario')); } catch { return null; } }
+
+async function carregarStatus() {
+  const token = getToken();
+  if (!token) return; // não logado — mostra planos normalmente
+
+  try {
+    const res  = await fetch('/api/pagamento/status', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (!res.ok) return;
+
+    const plano = data.plano;
+
+    if (plano === 'pro') {
+      document.getElementById('atual-pro').style.display  = 'block';
+      document.getElementById('atual-free').style.display = 'none';
+      document.getElementById('btn-pro').textContent      = 'Plano ativo ✓';
+      document.getElementById('btn-pro').disabled         = true;
+      document.getElementById('btn-free').textContent     = 'Fazer downgrade';
+      document.getElementById('cancelar-wrap').style.display = 'block';
+    } else {
+      document.getElementById('atual-free').style.display = 'block';
+      document.getElementById('btn-free').textContent     = 'Plano atual ✓';
+      document.getElementById('btn-free').disabled        = true;
+    }
+  } catch {}
+}
+
+async function assinarPro() {
+  const token = getToken();
+  if (!token) {
+    window.location.href = '/cadastro?acao=cadastro';
+    return;
+  }
+
+  const btn = document.getElementById('btn-pro');
+  btn.textContent = 'Aguarde...';
+  btn.disabled = true;
+
+  try {
+    const res  = await fetch('/api/pagamento/assinar', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+
+    if (res.ok && data.url_pagamento) {
+      // Redireciona para o Mercado Pago
+      window.location.href = data.url_pagamento;
+    } else {
+      mostrarBanner(data.erro || 'Erro ao iniciar pagamento.', 'erro');
+      btn.textContent = 'Assinar Pro →';
+      btn.disabled = false;
+    }
+  } catch {
+    mostrarBanner('Erro de conexão. Tente novamente.', 'erro');
+    btn.textContent = 'Assinar Pro →';
+    btn.disabled = false;
+  }
+}
+
+function usarFree() {
+  const token = getToken();
+  if (!token) window.location.href = '/cadastro';
+  else window.location.href = '/';
+}
+
+async function cancelarAssinatura() {
+  if (!confirm('Tem certeza que deseja cancelar sua assinatura Pro? Você voltará para o plano Free.')) return;
+
+  const token = getToken();
+  try {
+    const res  = await fetch('/api/pagamento/cancelar', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    const data = await res.json();
+    if (res.ok) {
+      mostrarBanner(data.mensagem, 'sucesso');
+      setTimeout(() => location.reload(), 2000);
+    } else {
+      mostrarBanner(data.erro || 'Erro ao cancelar.', 'erro');
+    }
+  } catch {
+    mostrarBanner('Erro de conexão.', 'erro');
+  }
+}
+
+function mostrarBanner(msg, tipo) {
+  const el = document.getElementById('status-banner');
+  el.textContent  = msg;
+  el.className    = `status-banner ${tipo}`;
+}
+
+// Checa status na URL (retorno do MP)
+const params = new URLSearchParams(location.search);
+if (params.get('status') === 'sucesso') {
+  mostrarBanner('🎉 Pagamento confirmado! Seu plano Pro está ativo.', 'sucesso');
+}
+
+carregarStatus();
+</script>
+</body>
+</html>
