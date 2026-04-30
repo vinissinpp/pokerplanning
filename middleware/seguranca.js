@@ -39,6 +39,7 @@ const helmetConfig = helmet({
       defaultSrc:  ["'self'"],
       scriptSrc:   ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com'],
       styleSrc:    ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
+      scriptSrcAttr: ["'unsafe-inline'"],
       fontSrc:     ["'self'", 'fonts.gstatic.com'],
       connectSrc:  ["'self'", 'wss:', 'ws:', process.env.SUPABASE_URL].filter(Boolean),
       imgSrc:      ["'self'", 'data:'],
