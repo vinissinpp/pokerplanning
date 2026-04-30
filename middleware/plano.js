@@ -1,40 +1,77 @@
 /**
- * middleware/plano.js
- * Verifica se o usuário pode executar ação baseado no plano
+ * middleware/plano.js — v2.0
+ * Limite baseado em salas_criadas (contador permanente, nunca decrementa)
+ * Free: 3 salas vitalícias | Pro: ilimitado
  */
 
 const supabase = require('../config/db');
-const PLANOS   = require('../config/planos');
 
-// Verifica limite de salas antes de criar
+const LIMITES = { free: 3, pro: Infinity };
+
+// Sequências de votação disponíveis para seleção na sala
+const SEQUENCIAS = {
+  fibonacci:     { label: 'Fibonacci',          valores: [1, 2, 3, 5, 8, 13, 21, '?'] },
+  fibonacci_ext: { label: 'Fibonacci Estendida', valores: [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, '?'] },
+  t_shirt:       { label: 'Camisetas',           valores: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '?'] },
+  pontos:        { label: 'Pontos',              valores: [1, 2, 4, 8, 16, 32, 64, '?'] },
+  linear:        { label: 'Linear (1–10)',        valores: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '?'] },
+};
+
+// Middleware: verifica se o usuário pode criar mais uma sala
 async function verificarLimiteSalas(req, res, next) {
   try {
     const usuario = req.usuario;
-    if (!usuario) return next(); // guest — sem limite por plano
+    if (!usuario) return next(); // guest — sem conta, sem limite
 
-    const plano   = usuario.plano || 'free';
-    const limites = PLANOS[plano]?.limites;
-    if (!limites || limites.salas >= 999) return next(); // pro — sem limite
+    const { data: u, error } = await supabase
+      .from('usuarios')
+      .select('plano, salas_criadas')
+      .eq('id', usuario.id)
+      .single();
 
-    // Conta salas ativas do usuário
-    const { count } = await supabase
-      .from('salas')
-      .select('id', { count: 'exact', head: true })
-      .eq('dono_id', usuario.id)
-      .eq('ativa', true);
+    if (error || !u) return next(); // em caso de erro não bloqueia
 
-    if (count >= limites.salas) {
+    const plano       = u.plano || 'free';
+    const limite      = LIMITES[plano] ?? LIMITES.free;
+    const salasCriadas = u.salas_criadas ?? 0;
+
+    if (limite !== Infinity && salasCriadas >= limite) {
       return res.status(403).json({
-        erro:  `Plano Free permite até ${limites.salas} salas ativas. Faça upgrade para Pro.`,
-        acao:  'upgrade',
-        plano: plano,
+        erro:        'LIMITE_PLANO',
+        plano,
+        salasCriadas,
+        limite,
+        mensagem:    `Você atingiu o limite de ${limite} salas do plano gratuito. Faça upgrade para Pro e crie salas ilimitadas.`,
+        acao:        'upgrade',
       });
     }
 
+    req.planoInfo = { plano, salasCriadas, limite };
     next();
   } catch (err) {
-    next(); // em caso de erro, não bloqueia
+    console.error('[plano] erro:', err.message);
+    next(); // não bloqueia em caso de erro inesperado
   }
 }
 
-module.exports = { verificarLimiteSalas };
+// Incrementa salas_criadas atomicamente após criar sala com sucesso
+async function incrementarSalasCriadas(usuarioId) {
+  if (!usuarioId) return;
+  try {
+    // Tenta via RPC (atômica)
+    const { error } = await supabase.rpc('incrementar_salas_criadas', { uid: usuarioId });
+    if (error) {
+      // Fallback manual
+      const { data: u } = await supabase
+        .from('usuarios').select('salas_criadas').eq('id', usuarioId).single();
+      await supabase
+        .from('usuarios')
+        .update({ salas_criadas: (u?.salas_criadas ?? 0) + 1 })
+        .eq('id', usuarioId);
+    }
+  } catch (err) {
+    console.error('[plano] incrementar:', err.message);
+  }
+}
+
+module.exports = { verificarLimiteSalas, incrementarSalasCriadas, SEQUENCIAS, LIMITES };

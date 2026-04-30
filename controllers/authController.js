@@ -1,9 +1,17 @@
+/**
+ * controllers/authController.js — v2.0
+ * Adições:
+ *  - normalizarEmail() bloqueia +alias e pontos do Gmail
+ *  - salva email_normalizado no banco (índice único bloqueia duplicatas)
+ *  - inicializa salas_criadas: 0 no cadastro
+ *  - login retorna salasCriadas para o front atualizar o localStorage
+ */
+
 const bcrypt                          = require('bcryptjs');
 const { gerarToken }                  = require('../middleware/auth');
 const { enviarConfirmacao, enviarRecuperacao } = require('../config/email');
 const supabase                        = require('../config/db');
 
-// Gera código numérico de 6 dígitos
 function gerarCodigo() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
@@ -12,7 +20,28 @@ function expiracaoMin(min) {
   return new Date(Date.now() + min * 60 * 1000).toISOString();
 }
 
-// ── CADASTRO ─────────────────────────────────
+// Normaliza email para bloquear contas duplicadas via +alias e pontos do Gmail
+function normalizarEmail(email) {
+  if (!email || typeof email !== 'string') return '';
+  const lower = email.toLowerCase().trim();
+  const at = lower.lastIndexOf('@');
+  if (at === -1) return lower;
+
+  let local  = lower.slice(0, at);
+  const dominio = lower.slice(at + 1);
+
+  // Remove alias (+tag) — funciona em Gmail, Outlook, ProtonMail, etc.
+  local = local.split('+')[0];
+
+  // Remove pontos do Gmail (a.b@gmail.com === ab@gmail.com)
+  if (dominio === 'gmail.com' || dominio === 'googlemail.com') {
+    local = local.replace(/\./g, '');
+  }
+
+  return `${local}@${dominio}`;
+}
+
+// ── CADASTRO ────────────────────────────────────────────────
 async function cadastro(req, res) {
   try {
     const { nome, email, senha } = req.body;
@@ -24,8 +53,10 @@ async function cadastro(req, res) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return res.status(400).json({ erro: 'E-mail inválido.' });
 
-    const emailNorm = email.toLowerCase().trim();
+    const emailNorm       = email.toLowerCase().trim();
+    const emailNormalizado = normalizarEmail(email);
 
+    // Verifica duplicata pelo email original
     const { data: existente } = await supabase
       .from('usuarios').select('id, email_verificado').eq('email', emailNorm).single();
 
@@ -35,14 +66,27 @@ async function cadastro(req, res) {
       return res.status(409).json({ erro: 'E-mail já cadastrado. Faça login.' });
     }
 
+    // Verifica duplicata pelo email normalizado (bloqueia +alias e variações de pontos)
+    const { data: existenteNorm } = await supabase
+      .from('usuarios').select('id').eq('email_normalizado', emailNormalizado).maybeSingle();
+
+    if (existenteNorm) {
+      return res.status(409).json({ erro: 'Este e-mail já está associado a uma conta existente.' });
+    }
+
     const senhaHash = await bcrypt.hash(senha, 12);
     const codigo    = gerarCodigo();
 
     const { data: usuario, error } = await supabase
       .from('usuarios')
       .insert({
-        nome: nome.trim(), email: emailNorm, senha_hash: senhaHash,
-        plano: 'free', email_verificado: false,
+        nome:               nome.trim(),
+        email:              emailNorm,
+        email_normalizado:  emailNormalizado,
+        senha_hash:         senhaHash,
+        plano:              'free',
+        email_verificado:   false,
+        salas_criadas:      0,          // contador permanente
         codigo_verificacao: codigo,
         codigo_expira_em:   expiracaoMin(15),
         codigo_tipo:        'confirmacao',
@@ -64,7 +108,7 @@ async function cadastro(req, res) {
   }
 }
 
-// ── CONFIRMAR E-MAIL ─────────────────────────
+// ── CONFIRMAR E-MAIL ─────────────────────────────────────────
 async function confirmarEmail(req, res) {
   try {
     const { email, codigo } = req.body;
@@ -72,7 +116,6 @@ async function confirmarEmail(req, res) {
       return res.status(400).json({ erro: 'E-mail e código são obrigatórios.' });
 
     const emailNorm = email.toLowerCase().trim();
-
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
 
@@ -96,7 +139,13 @@ async function confirmarEmail(req, res) {
     return res.json({
       mensagem: 'E-mail confirmado! Bem-vindo ao Pontua.',
       token,
-      usuario:  { id: usuario.id, nome: usuario.nome, email: usuario.email, plano: usuario.plano },
+      usuario: {
+        id:           usuario.id,
+        nome:         usuario.nome,
+        email:        usuario.email,
+        plano:        usuario.plano,
+        salasCriadas: usuario.salas_criadas ?? 0,
+      },
       redirect: '/',
     });
   } catch (err) {
@@ -105,7 +154,7 @@ async function confirmarEmail(req, res) {
   }
 }
 
-// ── REENVIAR CÓDIGO ──────────────────────────
+// ── REENVIAR CÓDIGO ───────────────────────────────────────────
 async function reenviarCodigo(req, res) {
   try {
     const { email } = req.body;
@@ -132,7 +181,7 @@ async function reenviarCodigo(req, res) {
   }
 }
 
-// ── LOGIN ────────────────────────────────────
+// ── LOGIN ─────────────────────────────────────────────────────
 async function login(req, res) {
   try {
     const { email, senha } = req.body;
@@ -147,7 +196,11 @@ async function login(req, res) {
       return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
 
     if (!usuario.email_verificado)
-      return res.status(403).json({ erro: 'Confirme seu e-mail antes de entrar.', acao: 'confirmar', email: emailNorm });
+      return res.status(403).json({
+        erro:  'Confirme seu e-mail antes de entrar.',
+        acao:  'confirmar',
+        email: emailNorm,
+      });
 
     const senhaOk = await bcrypt.compare(senha, usuario.senha_hash);
     if (!senhaOk)
@@ -159,7 +212,13 @@ async function login(req, res) {
     return res.json({
       mensagem: 'Login realizado!',
       token,
-      usuario:  { id: usuario.id, nome: usuario.nome, email: usuario.email, plano: usuario.plano },
+      usuario: {
+        id:           usuario.id,
+        nome:         usuario.nome,
+        email:        usuario.email,
+        plano:        usuario.plano,
+        salasCriadas: usuario.salas_criadas ?? 0,  // ← front usa para exibir no menu
+      },
       redirect: '/',
     });
   } catch (err) {
@@ -168,7 +227,7 @@ async function login(req, res) {
   }
 }
 
-// ── ESQUECI MINHA SENHA ──────────────────────
+// ── ESQUECI MINHA SENHA ───────────────────────────────────────
 async function esqueciSenha(req, res) {
   try {
     const { email } = req.body;
@@ -178,7 +237,6 @@ async function esqueciSenha(req, res) {
     const { data: usuario } = await supabase
       .from('usuarios').select('id, nome, email_verificado').eq('email', emailNorm).single();
 
-    // Não revela se o e-mail existe ou não (segurança)
     if (!usuario || !usuario.email_verificado) {
       return res.json({ mensagem: 'Se esse e-mail estiver cadastrado, você receberá um código.' });
     }
@@ -197,7 +255,7 @@ async function esqueciSenha(req, res) {
   }
 }
 
-// ── REDEFINIR SENHA ──────────────────────────
+// ── REDEFINIR SENHA ───────────────────────────────────────────
 async function redefinirSenha(req, res) {
   try {
     const { email, codigo, novaSenha } = req.body;
@@ -229,11 +287,13 @@ async function redefinirSenha(req, res) {
   }
 }
 
-// ── PERFIL ───────────────────────────────────
+// ── PERFIL ────────────────────────────────────────────────────
 async function perfil(req, res) {
   try {
     const { data: usuario } = await supabase
-      .from('usuarios').select('id, nome, email, plano, criado_em').eq('id', req.usuario.id).single();
+      .from('usuarios')
+      .select('id, nome, email, plano, salas_criadas, criado_em')
+      .eq('id', req.usuario.id).single();
     if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado.' });
     return res.json(usuario);
   } catch (err) {
@@ -241,4 +301,7 @@ async function perfil(req, res) {
   }
 }
 
-module.exports = { cadastro, confirmarEmail, reenviarCodigo, login, esqueciSenha, redefinirSenha, perfil };
+module.exports = {
+  cadastro, confirmarEmail, reenviarCodigo,
+  login, esqueciSenha, redefinirSenha, perfil,
+};

@@ -1,40 +1,32 @@
-const { v4: uuidv4 } = require('uuid');
-const supabase       = require('../config/db');
+/**
+ * socket/handlers.js — v2.0
+ * Mudanças:
+ *  - Remove limite de votos por IP (15/dia) — prejudicava times corporativos
+ *  - Admin continua por donoSocketId (compatível com front atual)
+ *    mas agora reconecta corretamente via usuarioId quando logado
+ *  - Adiciona evento 'mudarSequencia' para trocar as cartas em tempo real
+ *  - SEQUENCIAS importadas do middleware/plano.js
+ */
 
-const LIMITE_VOTOS_DIA = 15;
-const ipUsage = {};
-
-function hojeStr() { return new Date().toISOString().slice(0, 10); }
-function getIp(socket) {
-  return socket.handshake.headers['x-forwarded-for']?.split(',')[0].trim()
-    || socket.handshake.address || 'unknown';
-}
-function verificarLimite(ip) {
-  const hoje = hojeStr();
-  if (!ipUsage[ip] || ipUsage[ip].data !== hoje) ipUsage[ip] = { votos: 0, data: hoje };
-  return ipUsage[ip].votos < LIMITE_VOTOS_DIA;
-}
-function incrementar(ip) {
-  const hoje = hojeStr();
-  if (!ipUsage[ip] || ipUsage[ip].data !== hoje) ipUsage[ip] = { votos: 0, data: hoje };
-  ipUsage[ip].votos++;
-}
-function restantes(ip) {
-  const hoje = hojeStr();
-  if (!ipUsage[ip] || ipUsage[ip].data !== hoje) return LIMITE_VOTOS_DIA;
-  return Math.max(0, LIMITE_VOTOS_DIA - ipUsage[ip].votos);
-}
+const { v4: uuidv4 }  = require('uuid');
+const supabase         = require('../config/db');
+const { SEQUENCIAS }   = require('../middleware/plano');
 
 function estadoPublico(sala) {
   return {
-    id: sala.id, nome: sala.nome,
-    donoSocketId: sala.donoSocketId, // front usa para saber quem é admin
+    id:           sala.id,
+    nome:         sala.nome,
+    donoSocketId: sala.donoSocketId,
+    sequencia:    sala.sequencia || 'fibonacci',
+    cartas:       SEQUENCIAS[sala.sequencia || 'fibonacci']?.valores || SEQUENCIAS.fibonacci.valores,
     participantes: Object.values(sala.participantes),
-    tarefas:    sala.tarefas,
-    tarefaAtiva: sala.tarefaAtiva,
+    tarefas:      sala.tarefas,
+    tarefaAtiva:  sala.tarefaAtiva,
     votos: sala.revelado
       ? sala.votos
-      : Object.fromEntries(Object.entries(sala.votos).map(([k, v]) => [k, v !== null ? '?' : null])),
+      : Object.fromEntries(
+          Object.entries(sala.votos).map(([k, v]) => [k, v !== null ? '?' : null])
+        ),
     revelado:  sala.revelado,
     historico: sala.historico,
   };
@@ -49,7 +41,7 @@ async function garantirSala(salas, salaId) {
   if (salas[salaId]) return true;
 
   const { data: sala } = await supabase
-    .from('salas').select('id, nome, dono_id').eq('id', salaId).single();
+    .from('salas').select('id, nome, dono_id, sequencia').eq('id', salaId).single();
 
   if (!sala) return false;
 
@@ -57,134 +49,162 @@ async function garantirSala(salas, salaId) {
   const { data: historico } = await supabase.from('historico').select('*').eq('sala_id', salaId).order('votado_em');
 
   salas[salaId] = {
-    id: sala.id, nome: sala.nome,
-    donoId: sala.dono_id, donoSocketId: null,
-    participantes: {}, tarefas: tarefas || [],
-    tarefaAtiva: tarefas?.find(t => t.pontos === null)?.id || null,
-    votos: {}, revelado: false,
-    historico: (historico || []).map(h => ({
-      tarefaId: h.tarefa_id, tarefaNome: h.tarefa_nome,
-      responsavel: h.responsavel, pontos: h.pontos,
-      media: h.media, votos: h.votos, timestamp: h.votado_em,
+    id:           sala.id,
+    nome:         sala.nome,
+    donoId:       sala.dono_id,
+    donoSocketId: null,
+    sequencia:    sala.sequencia || 'fibonacci',
+    participantes: {},
+    tarefas:      tarefas || [],
+    tarefaAtiva:  tarefas?.find(t => t.pontos === null)?.id || null,
+    votos:        {},
+    revelado:     false,
+    historico:    (historico || []).map(h => ({
+      tarefaId:   h.tarefa_id,
+      tarefaNome: h.tarefa_nome,
+      responsavel: h.responsavel,
+      pontos:     h.pontos,
+      media:      h.media,
+      votos:      h.votos,
+      timestamp:  h.votado_em,
     })),
   };
   return true;
 }
 
-// Verifica se socket é o admin da sala
 function isAdmin(sala, socketId) {
   return sala.donoSocketId === socketId;
 }
 
 function registrar(io, salas) {
   io.on('connection', (socket) => {
-    const ip = getIp(socket);
 
     socket.on('entrar', async ({ salaId, nome, usuarioId }) => {
       if (!salaId || !nome) return;
 
       let existe = await garantirSala(salas, salaId);
       if (!existe) {
-        // Cria sala em memória e no banco
         salas[salaId] = {
           id: salaId, nome: `Sala ${salaId}`,
           donoId: usuarioId || null, donoSocketId: null,
+          sequencia: 'fibonacci',
           participantes: {}, tarefas: [], tarefaAtiva: null,
           votos: {}, revelado: false, historico: [],
         };
-        await supabase.from('salas').insert({ id: salaId, nome: `Sala ${salaId}`, dono_id: usuarioId || null });
+        await supabase.from('salas').insert({
+          id: salaId, nome: `Sala ${salaId}`, dono_id: usuarioId || null,
+        });
       }
 
       const sala = salas[salaId];
       socket.join(salaId);
-      socket.data = { salaId, nome: nome.trim(), ip, usuarioId: usuarioId || null };
+      socket.data = { salaId, nome: nome.trim(), usuarioId: usuarioId || null };
       sala.participantes[socket.id] = { id: socket.id, nome: nome.trim() };
 
-      // Se é o dono da sala, registra como admin
-      if (usuarioId && sala.donoId && usuarioId === sala.donoId) {
+      // Reconecta admin: dono logado reconecta pelo usuarioId
+      if (usuarioId && sala.donoId && String(usuarioId) === String(sala.donoId)) {
         sala.donoSocketId = socket.id;
       }
-      // Se sala não tem dono definido, primeiro a entrar vira admin
+      // Sala sem dono: primeiro a entrar vira admin
       if (!sala.donoSocketId && !sala.donoId) {
         sala.donoSocketId = socket.id;
       }
 
       if (sala.tarefaAtiva) sala.votos[socket.id] = null;
 
-      socket.emit('limiteIp', { restantes: restantes(ip), limite: LIMITE_VOTOS_DIA });
       emit(io, salas, salaId);
     });
 
     socket.on('votar', ({ valor }) => {
-      const { salaId, ip: sIp } = socket.data || {};
+      const { salaId } = socket.data || {};
       const sala = salas[salaId];
       if (!sala || sala.revelado || !sala.tarefaAtiva) return;
-      if (!verificarLimite(sIp)) {
-        socket.emit('erroVoto', { msg: `Limite de ${LIMITE_VOTOS_DIA} votos/dia atingido.` });
-        return;
-      }
-      incrementar(sIp);
+      // Valida que o valor é uma carta válida da sequência atual
+      const cartasValidas = SEQUENCIAS[sala.sequencia || 'fibonacci']?.valores || SEQUENCIAS.fibonacci.valores;
+      if (!cartasValidas.includes(valor) && valor !== '?') return;
       sala.votos[socket.id] = valor;
-      socket.emit('limiteIp', { restantes: restantes(sIp), limite: LIMITE_VOTOS_DIA });
       emit(io, salas, salaId);
     });
 
-    // Apenas admin pode revelar
     socket.on('revelar', () => {
       const sala = salas[socket.data?.salaId];
       if (!sala || !isAdmin(sala, socket.id)) return;
       sala.revelado = true;
       const nums  = Object.values(sala.votos).filter(v => typeof v === 'number');
-      const media = nums.length ? Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10 : null;
+      const media = nums.length
+        ? Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10
+        : null;
       io.to(socket.data.salaId).emit('revelado', { votos: sala.votos, media });
       emit(io, salas, socket.data.salaId);
     });
 
-    // Apenas admin pode resetar
     socket.on('resetar', () => {
       const sala = salas[socket.data?.salaId];
       if (!sala || !isAdmin(sala, socket.id)) return;
       sala.revelado = false;
-      Object.keys(sala.participantes).forEach(id => sala.votos[id] = null);
+      Object.keys(sala.participantes).forEach(id => { sala.votos[id] = null; });
       emit(io, salas, socket.data.salaId);
     });
 
-    // Apenas admin pode selecionar tarefa
     socket.on('selecionarTarefa', ({ tarefaId }) => {
       const sala = salas[socket.data?.salaId];
       if (!sala || !isAdmin(sala, socket.id)) return;
       sala.tarefaAtiva = tarefaId;
       sala.revelado    = false;
-      Object.keys(sala.participantes).forEach(id => sala.votos[id] = null);
+      Object.keys(sala.participantes).forEach(id => { sala.votos[id] = null; });
       emit(io, salas, socket.data.salaId);
     });
 
-    // Apenas admin pode adicionar tarefa
+    // NOVO: troca de sequência em tempo real (só admin)
+    socket.on('mudarSequencia', async ({ sequencia }) => {
+      const { salaId } = socket.data || {};
+      const sala = salas[salaId];
+      if (!sala || !isAdmin(sala, socket.id)) return;
+      if (!SEQUENCIAS[sequencia]) return; // sequência inválida
+
+      sala.sequencia = sequencia;
+      sala.revelado  = false;
+      Object.keys(sala.participantes).forEach(id => { sala.votos[id] = null; });
+
+      // Persiste no banco
+      await supabase.from('salas').update({ sequencia }).eq('id', salaId);
+
+      emit(io, salas, salaId);
+    });
+
     socket.on('adicionarTarefa', async ({ nome, descricao, responsavel }) => {
       const { salaId } = socket.data || {};
       const sala = salas[salaId];
       if (!sala || !isAdmin(sala, socket.id) || !nome?.trim()) return;
 
       const tarefa = {
-        id: uuidv4().slice(0, 8), nome: nome.trim(),
-        descricao: descricao?.trim() || '', responsavel: responsavel?.trim() || '',
-        pontos: null, criada_em: new Date().toISOString(), ordem: sala.tarefas.length,
+        id:          uuidv4().slice(0, 8),
+        nome:        nome.trim(),
+        descricao:   descricao?.trim() || '',
+        responsavel: responsavel?.trim() || '',
+        pontos:      null,
+        criada_em:   new Date().toISOString(),
+        ordem:       sala.tarefas.length,
       };
       sala.tarefas.push(tarefa);
+
       if (sala.tarefas.length === 1) {
         sala.tarefaAtiva = tarefa.id;
-        Object.keys(sala.participantes).forEach(id => sala.votos[id] = null);
+        Object.keys(sala.participantes).forEach(id => { sala.votos[id] = null; });
       }
 
       await supabase.from('tarefas').insert({
-        id: tarefa.id, sala_id: salaId, nome: tarefa.nome,
-        descricao: tarefa.descricao, responsavel: tarefa.responsavel, ordem: tarefa.ordem,
+        id:          tarefa.id,
+        sala_id:     salaId,
+        nome:        tarefa.nome,
+        descricao:   tarefa.descricao,
+        responsavel: tarefa.responsavel,
+        ordem:       tarefa.ordem,
       });
 
       emit(io, salas, salaId);
     });
 
-    // Apenas admin pode editar tarefa
     socket.on('editarTarefa', async ({ tarefaId, nome, descricao, responsavel }) => {
       const { salaId } = socket.data || {};
       const sala = salas[salaId];
@@ -192,7 +212,7 @@ function registrar(io, salas) {
 
       const tarefa = sala.tarefas.find(t => t.id === tarefaId);
       if (tarefa) {
-        tarefa.nome = nome.trim();
+        tarefa.nome        = nome.trim();
         tarefa.descricao   = descricao?.trim() || '';
         tarefa.responsavel = responsavel?.trim() || '';
         await supabase.from('tarefas')
@@ -202,7 +222,6 @@ function registrar(io, salas) {
       emit(io, salas, salaId);
     });
 
-    // Apenas admin pode salvar resultado
     socket.on('salvarResultado', async ({ tarefaId, pontos }) => {
       const { salaId } = socket.data || {};
       const sala = salas[salaId];
@@ -219,7 +238,9 @@ function registrar(io, salas) {
           if (p && val !== null) votosNominais[p.nome] = val;
         });
         const nums  = Object.values(sala.votos).filter(v => typeof v === 'number');
-        const media = nums.length ? Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10 : null;
+        const media = nums.length
+          ? Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10
+          : null;
 
         const entrada = {
           tarefaId, tarefaNome: tarefa.nome, responsavel: tarefa.responsavel,
@@ -228,8 +249,11 @@ function registrar(io, salas) {
         sala.historico.push(entrada);
 
         await supabase.from('historico').insert({
-          sala_id: salaId, tarefa_id: tarefaId, tarefa_nome: tarefa.nome,
-          responsavel: tarefa.responsavel, pontos, media, votos: votosNominais,
+          sala_id:     salaId,
+          tarefa_id:   tarefaId,
+          tarefa_nome: tarefa.nome,
+          responsavel: tarefa.responsavel,
+          pontos, media, votos: votosNominais,
         });
       }
 
@@ -237,7 +261,7 @@ function registrar(io, salas) {
       if (proxima) {
         sala.tarefaAtiva = proxima.id;
         sala.revelado    = false;
-        Object.keys(sala.participantes).forEach(id => sala.votos[id] = null);
+        Object.keys(sala.participantes).forEach(id => { sala.votos[id] = null; });
       }
       emit(io, salas, salaId);
     });

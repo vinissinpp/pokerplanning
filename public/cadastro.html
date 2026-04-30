@@ -41,7 +41,6 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 .tab-panel{ display:none; }
 .tab-panel.ativo{ display:block; }
 
-/* Etapas do cadastro */
 .etapa{ display:none; }
 .etapa.ativa{ display:block; }
 .etapa-indicator{ display:flex; align-items:center; gap:8px; margin-bottom:1.5rem; }
@@ -82,7 +81,6 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 .back-home{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--textm); text-decoration:none; margin-bottom:2rem; }
 .back-home:hover{ color:var(--text); }
 
-/* Código de 6 dígitos */
 .codigo-inputs{ display:flex; gap:10px; justify-content:center; margin:1.5rem 0; }
 .codigo-input{ width:52px; height:62px; border:2px solid var(--c4); border-radius:var(--radius-sm); font-family:'Syne',sans-serif; font-size:28px; font-weight:800; text-align:center; background:var(--c5); color:var(--text); outline:none; transition:all .15s; }
 .codigo-input:focus{ border-color:var(--c1); background:var(--white); box-shadow:0 0 0 3px rgba(255,66,66,.08); }
@@ -97,12 +95,8 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 </head>
 <body>
 
-<!-- ── ESQUERDA ── -->
 <div class="left-panel">
-  <div class="left-logo">
-    <span class="dot"></span>Pontua
-    <span class="sub">planning</span>
-  </div>
+  <div class="left-logo"><span class="dot"></span>Pontua<span class="sub">planning</span></div>
   <div class="left-content">
     <div>
       <div class="left-title">Estime melhor.<br><span class="accent">Entregue mais.</span></div>
@@ -114,10 +108,9 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
       <div class="lf-item"><div class="lf-icon">👥</div><div class="lf-text"><strong>Time sempre pronto</strong><br>Salve participantes e convide com um clique.</div></div>
     </div>
   </div>
-  <div class="left-bottom">© 2025 Pontua Planning</div>
+  <div class="left-bottom">© <span id="footer-ano-left"></span> Pontua Planning</div>
 </div>
 
-<!-- ── DIREITA ── -->
 <div class="right-panel">
   <div class="auth-box">
     <a class="back-home" href="/">← Voltar ao início</a>
@@ -129,7 +122,6 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 
     <!-- ══ LOGIN ══ -->
     <div class="tab-panel ativo" id="tp-login">
-      <!-- Etapa 1: Login normal -->
       <div class="etapa ativa" id="login-etapa-1">
         <div class="form-title">Bem-vindo de volta!</div>
         <div class="form-sub">Entre com seu e-mail e senha para continuar.</div>
@@ -148,7 +140,6 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
         <div class="terms">Não tem conta? <a onclick="mudarTab('cadastro')">Criar conta grátis →</a></div>
       </div>
 
-      <!-- Etapa 2: Confirmar email (se ainda não confirmou) -->
       <div class="etapa" id="login-etapa-confirmar">
         <div class="form-title">Confirme seu e-mail</div>
         <div class="form-sub">Enviamos um código para <strong id="login-email-exibir"></strong>. Digite abaixo para ativar sua conta.</div>
@@ -162,18 +153,17 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
         </div>
         <div class="erro-msg" id="login-conf-erro"></div>
         <button class="btn-auth" onclick="confirmarEmailLogin()">Confirmar e entrar</button>
-        <button class="btn-sec" onclick="reenviarCodigo('login-email-guard')">Reenviar código</button>
+        <button class="btn-sec" onclick="reenviarCodigo('login')">Reenviar código</button>
       </div>
     </div>
 
     <!-- ══ CADASTRO ══ -->
     <div class="tab-panel" id="tp-cadastro">
-      <!-- Etapa 1: Dados -->
       <div class="etapa ativa" id="cad-etapa-1">
         <div class="etapa-indicator">
-          <div class="etapa-step ativo" id="cad-step-1">1</div>
-          <div class="etapa-line" id="cad-line-1"></div>
-          <div class="etapa-step" id="cad-step-2">2</div>
+          <div class="etapa-step ativo">1</div>
+          <div class="etapa-line"></div>
+          <div class="etapa-step">2</div>
         </div>
         <div class="form-title">Criar sua conta</div>
         <div class="form-sub">Plano gratuito — sem cartão de crédito.</div>
@@ -202,12 +192,11 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
         <div class="terms">Já tem conta? <a onclick="mudarTab('login')">← Entrar</a></div>
       </div>
 
-      <!-- Etapa 2: Confirmar código -->
       <div class="etapa" id="cad-etapa-2">
         <div class="etapa-indicator">
-          <div class="etapa-step concluido" id="cad-step-1b">✓</div>
-          <div class="etapa-line ativo" id="cad-line-1b"></div>
-          <div class="etapa-step ativo" id="cad-step-2b">2</div>
+          <div class="etapa-step concluido">✓</div>
+          <div class="etapa-line ativo"></div>
+          <div class="etapa-step ativo">2</div>
         </div>
         <div class="form-title">Confirme seu e-mail</div>
         <div class="form-sub">Enviamos um código de 6 dígitos para <strong id="cad-email-exibir"></strong>.</div>
@@ -223,7 +212,7 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
         <div class="ok-msg" id="cad-conf-ok"></div>
         <button class="btn-auth" onclick="confirmarEmailCadastro()">Confirmar e entrar →</button>
         <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--textm);">
-          Não recebeu? <button class="reenviar-btn" onclick="reenviarCodigo('cad-email-guard')">Reenviar código</button>
+          Não recebeu? <button class="reenviar-btn" onclick="reenviarCodigo('cad')">Reenviar código</button>
         </div>
       </div>
     </div>
@@ -260,13 +249,16 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
         <button class="btn-auth" onclick="redefinirSenha()">Redefinir senha</button>
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ── Guards de e-mail entre etapas ──
+const TOKEN_KEY   = 'pontua_token';
+const USUARIO_KEY = 'pontua_usuario';
 let emailGuards = {};
+
+// Ano dinâmico no footer
+document.getElementById('footer-ano-left').textContent = new Date().getFullYear();
 
 function mudarTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('ativo'));
@@ -302,11 +294,11 @@ function medirForca(senha) {
   label.textContent = l.text;
 }
 
-// Avança foco entre inputs de código
 function avancarCodigo(input, idx, prefixo) {
   input.value = input.value.replace(/\D/g,'');
-  const inputs = document.querySelectorAll(`#${prefixo === 'cad-conf' ? 'cad-etapa-2' : prefixo === 'login-conf' ? 'login-etapa-confirmar' : 'rec-etapa-2'} .codigo-input`);
-  if (input.value && idx < 5) inputs[idx+1].focus();
+  const etapaId = prefixo === 'cad-conf' ? 'cad-etapa-2' : prefixo === 'login-conf' ? 'login-etapa-confirmar' : 'rec-etapa-2';
+  const inputs = document.querySelectorAll(`#${etapaId} .codigo-input`);
+  if (input.value && idx < 5) inputs[idx+1]?.focus();
 }
 
 function getCodigo(prefixo) {
@@ -314,25 +306,32 @@ function getCodigo(prefixo) {
   return [...document.querySelectorAll(`#${etapaId} .codigo-input`)].map(i => i.value).join('');
 }
 
-function salvarToken(token, usuario) {
-  localStorage.setItem('pontua_token', token);
-  localStorage.setItem('pontua_usuario', JSON.stringify(usuario));
+// Salva token + usuario no localStorage (inclui salasCriadas)
+function salvarSessao(token, usuario) {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(USUARIO_KEY, JSON.stringify({
+    id:           usuario.id,
+    nome:         usuario.nome,
+    email:        usuario.email,
+    plano:        usuario.plano || 'free',
+    salasCriadas: usuario.salasCriadas ?? 0,
+  }));
 }
 
 // ── CADASTRO ──
 async function fazerCadastro() {
-  const nome     = document.getElementById('cad-nome').value.trim();
-  const sobre    = document.getElementById('cad-sobrenome').value.trim();
-  const email    = document.getElementById('cad-email').value.trim();
-  const senha    = document.getElementById('cad-senha').value;
-  const termos   = document.getElementById('cad-termos').checked;
-  const err      = document.getElementById('cad-erro');
+  const nome   = document.getElementById('cad-nome').value.trim();
+  const sobre  = document.getElementById('cad-sobrenome').value.trim();
+  const email  = document.getElementById('cad-email').value.trim();
+  const senha  = document.getElementById('cad-senha').value;
+  const termos = document.getElementById('cad-termos').checked;
+  const err    = document.getElementById('cad-erro');
   err.textContent = '';
 
-  if (!nome)    return err.textContent = 'Informe seu nome.';
-  if (!email)   return err.textContent = 'Informe seu e-mail.';
+  if (!nome)   return err.textContent = 'Informe seu nome.';
+  if (!email)  return err.textContent = 'Informe seu e-mail.';
   if (senha.length < 8) return err.textContent = 'Senha precisa ter pelo menos 8 caracteres.';
-  if (!termos)  return err.textContent = 'Aceite os termos para continuar.';
+  if (!termos) return err.textContent = 'Aceite os termos para continuar.';
 
   const btn = document.getElementById('btn-cad');
   btn.disabled = true; btn.textContent = 'Criando conta...';
@@ -370,7 +369,7 @@ async function confirmarEmailCadastro() {
     });
     const data = await res.json();
     if (res.ok) {
-      salvarToken(data.token, data.usuario);
+      salvarSessao(data.token, data.usuario);
       ok.textContent = '✅ ' + data.mensagem; ok.classList.add('visivel');
       setTimeout(() => window.location.href = data.redirect || '/', 1000);
     } else {
@@ -400,7 +399,7 @@ async function fazerLogin() {
     });
     const data = await res.json();
     if (res.ok) {
-      salvarToken(data.token, data.usuario);
+      salvarSessao(data.token, data.usuario);
       ok.textContent = '✅ ' + data.mensagem; ok.classList.add('visivel');
       setTimeout(() => window.location.href = data.redirect || '/', 800);
     } else if (data.acao === 'confirmar') {
@@ -427,7 +426,7 @@ async function confirmarEmailLogin() {
     });
     const data = await res.json();
     if (res.ok) {
-      salvarToken(data.token, data.usuario);
+      salvarSessao(data.token, data.usuario);
       window.location.href = data.redirect || '/';
     } else { err.textContent = data.erro || 'Código inválido.'; }
   } catch { err.textContent = 'Erro de conexão.'; }
@@ -478,9 +477,8 @@ async function redefinirSenha() {
   } catch { err.textContent = 'Erro de conexão.'; }
 }
 
-// ── REENVIAR CÓDIGO ──
 async function reenviarCodigo(guard) {
-  const email = emailGuards[guard === 'cad-email-guard' ? 'cad' : 'login'];
+  const email = emailGuards[guard];
   if (!email) return;
   await fetch('/api/auth/reenviar-codigo', {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -489,12 +487,11 @@ async function reenviarCodigo(guard) {
   alert('Novo código enviado!');
 }
 
-// Checa params da URL
+// Init
 const params = new URLSearchParams(location.search);
 if (params.get('acao') === 'cadastro') mudarTab('cadastro');
 
-// Enter nos campos
-document.getElementById('login-senha').addEventListener('keydown', e => e.key === 'Enter' && fazerLogin());
+document.getElementById('login-senha')?.addEventListener('keydown', e => e.key === 'Enter' && fazerLogin());
 </script>
 </body>
 </html>

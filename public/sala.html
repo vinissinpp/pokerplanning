@@ -44,6 +44,7 @@ body{ font-family:'DM Sans',sans-serif; background:var(--c5); color:var(--text);
 #tela-sala{ display:none; flex-direction:column; min-height:100vh; }
 #tela-sala.ativa{ display:flex; }
 
+/* ── NAV ── */
 nav{ display:flex; align-items:center; justify-content:space-between; padding:.875rem 2rem; background:var(--white); border-bottom:1px solid var(--c4); position:sticky; top:0; z-index:50; gap:10px; }
 .nav-logo{ font-family:'Syne',sans-serif; font-weight:800; font-size:18px; display:flex; align-items:baseline; gap:5px; text-decoration:none; color:var(--text); }
 .nav-logo .dot{ width:8px; height:8px; border-radius:50%; background:var(--c1); display:inline-block; margin-right:2px; }
@@ -51,13 +52,62 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .nav-sala{ font-size:13px; color:var(--textm); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nav-badge{ font-size:11px; background:var(--c3); color:#2a3a00; padding:3px 10px; border-radius:20px; font-weight:600; }
 .nav-dir{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.votos-rest{ font-size:11px; color:var(--textm); background:var(--c5); border:1px solid var(--c4); padding:3px 10px; border-radius:20px; }
-.votos-rest.alerta{ background:#fff3f3; border-color:#ffb3b3; color:var(--c1); }
-.nav-usuario-sala{ display:flex; align-items:center; gap:7px; background:var(--c5); border:1px solid var(--c4); padding:4px 12px 4px 6px; border-radius:20px; font-size:12px; }
-.nav-av-sm{ width:24px; height:24px; border-radius:50%; background:var(--c1); color:#fff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; }
-.admin-badge{ font-size:10px; background:var(--c1); color:#fff; padding:2px 7px; border-radius:8px; font-weight:600; }
 .btn-nav{ background:none; border:1px solid var(--c4); padding:6px 12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; color:var(--textm); transition:all .15s; display:inline-flex; align-items:center; gap:5px; }
 .btn-nav:hover{ background:var(--c4); color:var(--text); }
+
+/* Menu dropdown do usuário na sala */
+.user-menu-wrap-sala { position:relative; }
+.user-avatar-btn-sala {
+  display:flex; align-items:center; gap:7px;
+  background:var(--c5); border:1.5px solid var(--c4);
+  border-radius:999px; padding:4px 12px 4px 5px;
+  cursor:pointer; font-family:inherit; font-size:12px;
+  color:var(--text); transition:all .15s;
+}
+.user-avatar-btn-sala:hover { border-color:#bbc890; background:var(--c2); }
+.nav-av-sm { width:24px; height:24px; border-radius:50%; background:var(--c1); color:#fff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; }
+.admin-badge { font-size:10px; background:var(--c1); color:#fff; padding:2px 7px; border-radius:8px; font-weight:600; }
+.chevron-sm { width:10px; height:10px; opacity:.5; }
+
+.user-dropdown-sala {
+  display:none; position:absolute; top:calc(100% + 8px); right:0;
+  min-width:210px; background:var(--white);
+  border:1px solid #e8e8e8; border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.10); z-index:1000; overflow:hidden;
+  animation:dropIn .15s ease;
+}
+.user-dropdown-sala.aberto { display:block; }
+@keyframes dropIn { from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);} }
+.dropdown-plano-sala { padding:12px 14px; display:flex; align-items:center; gap:10px; background:#fafafa; }
+.plano-badge-sala { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:#f0f0f0; color:#555; text-transform:uppercase; }
+.plano-badge-sala.pro { background:var(--c3); color:#2a4000; }
+.plano-desc-sala { font-size:12px; color:#888; }
+.dropdown-divider { height:1px; background:#f0f0f0; }
+.dropdown-item-sala {
+  display:flex; align-items:center; gap:9px;
+  padding:10px 14px; font-size:13px; color:#333;
+  text-decoration:none; background:none; border:none;
+  width:100%; text-align:left; cursor:pointer;
+  font-family:inherit; transition:background .12s;
+}
+.dropdown-item-sala:hover { background:#f5f5f5; }
+.dropdown-item-sala.upgrade-sala { color:var(--c1); font-weight:500; }
+.dropdown-item-sala.upgrade-sala:hover { background:#fff0f0; }
+.dropdown-item-sala.sair-sala { color:#666; }
+
+/* Modal seletor de sequência */
+.seq-opcoes { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.seq-opcao {
+  display:flex; flex-direction:column; gap:2px;
+  text-align:left; padding:11px 14px;
+  border:1.5px solid var(--c4); border-radius:10px;
+  background:var(--white); cursor:pointer;
+  font-family:inherit; transition:all .15s;
+}
+.seq-opcao:hover { border-color:var(--c1); background:#fff8f8; }
+.seq-opcao.ativa-seq { border-color:var(--c1); background:#fff0f0; }
+.seq-opcao strong { font-size:13px; color:#222; }
+.seq-opcao span { font-size:11px; color:#888; margin-top:1px; }
 
 /* ── LAYOUT ── */
 .sala-body{ display:grid; grid-template-columns:1fr 300px; gap:14px; padding:1.25rem 2rem; flex:1; align-items:start; }
@@ -83,8 +133,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .btn-sm:hover{ background:#c0dc3e; }
 .btn-icon{ background:none; border:none; cursor:pointer; padding:4px 6px; border-radius:6px; color:var(--texts); font-size:14px; transition:all .15s; display:inline-flex; align-items:center; }
 .btn-icon:hover{ background:var(--c4); }
-
-/* Botões desabilitados para não-admin */
 .btn-p:disabled,.btn-sm:disabled,.btn-s:disabled{ opacity:.4; cursor:not-allowed; pointer-events:none; }
 
 .media-box{ display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--c4); }
@@ -177,11 +225,16 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .dot.ok{ background:var(--c3); border:1px solid #aad020; }
 .dot.cur{ background:var(--c1); }
 
+/* ── BANNER NÃO-ADMIN ── */
+.banner-visitante{ background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:8px 14px; font-size:12px; color:#2a3a00; display:none; align-items:center; gap:8px; margin-bottom:4px; }
+.banner-visitante.visivel{ display:flex; }
+
 /* ── MODAIS ── */
 .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.3); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
 .overlay.ativo{ display:flex; }
 .modal{ background:var(--white); border-radius:var(--radius); padding:2rem; width:100%; max-width:440px; margin:1rem; animation:fadeUp .22s ease both; box-shadow:0 20px 60px rgba(0,0,0,.15); }
 .modal h3{ font-family:'Syne',sans-serif; font-size:18px; font-weight:800; margin-bottom:1rem; }
+.modal-sub{ font-size:13px; color:var(--textm); margin-bottom:16px; }
 .modal-btns{ display:flex; gap:8px; margin-top:1.25rem; }
 .upload-area{ border:2px dashed var(--c4); border-radius:var(--radius-sm); padding:1.75rem; text-align:center; cursor:pointer; transition:all .2s; background:var(--c5); margin-bottom:1rem; }
 .upload-area:hover,.upload-area.drag{ border-color:var(--c1); background:var(--c2); }
@@ -198,10 +251,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .toast{ position:fixed; bottom:1.5rem; right:1.5rem; background:var(--text); color:#fff; font-size:13px; padding:10px 18px; border-radius:var(--radius-sm); opacity:0; transition:opacity .2s; z-index:300; pointer-events:none; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,.18); }
 .toast.show{ opacity:1; }
 .toast.erro{ background:var(--c1); }
-
-/* ── BANNER NÃO-ADMIN ── */
-.banner-visitante{ background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:8px 14px; font-size:12px; color:#2a3a00; display:none; align-items:center; gap:8px; margin-bottom:4px; }
-.banner-visitante.visivel{ display:flex; }
 
 @media(max-width:960px){ .sala-body{ grid-template-columns:1fr 260px; } }
 @media(max-width:700px){ .sala-body{ grid-template-columns:1fr; padding:1rem; } .sidebar{ order:-1; } nav{ padding:.875rem 1rem; } .carta-btn{ width:54px; height:76px; } .carta-valor{ font-size:17px; } .metricas-resumo-grid{ grid-template-columns:repeat(2,1fr); } .tarefas-status{ grid-template-columns:1fr; } }
@@ -229,21 +278,41 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     <a class="nav-logo" href="/"><span class="dot"></span>Pontua<span class="sub">planning</span></a>
     <div class="nav-sala" id="nav-sala-nome">—</div>
     <div class="nav-dir">
-      <span class="votos-rest" id="votos-rest" style="display:none"></span>
       <span class="nav-badge" id="nav-badge">0 online</span>
-      <div class="nav-usuario-sala" id="nav-usuario-sala" style="display:none">
-        <div class="nav-av-sm" id="nav-av-sm">?</div>
-        <span id="nav-nome-sm">—</span>
-        <span class="admin-badge" id="admin-badge" style="display:none">admin</span>
+
+      <!-- Botão de trocar sequência (só admin) -->
+      <button class="btn-nav" id="btn-seq" onclick="abrirModalSequencia()" style="display:none">🃏 Sequência</button>
+
+      <!-- Menu dropdown do usuário -->
+      <div class="user-menu-wrap-sala">
+        <button class="user-avatar-btn-sala" id="user-avatar-btn-sala" onclick="toggleDropdownSala()">
+          <div class="nav-av-sm" id="nav-av-sm">?</div>
+          <span id="nav-nome-sm">—</span>
+          <span class="admin-badge" id="admin-badge" style="display:none">admin</span>
+          <svg class="chevron-sm" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <div class="user-dropdown-sala" id="user-dropdown-sala">
+          <div class="dropdown-plano-sala">
+            <span class="plano-badge-sala" id="plano-badge-sala">Free</span>
+            <span class="plano-desc-sala" id="plano-desc-sala">Plano gratuito</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a href="/planos" class="dropdown-item-sala upgrade-sala" id="dropdown-upgrade-sala">⭐ Upgrade para Pro</a>
+          <div class="dropdown-divider"></div>
+          <a href="/" class="dropdown-item-sala">← Início</a>
+          <button class="dropdown-item-sala sair-sala" onclick="sairDaConta()">→ Sair da conta</button>
+        </div>
       </div>
+
       <button class="btn-nav" onclick="copiarLink()">🔗 Copiar link</button>
     </div>
   </nav>
 
   <div class="sala-body">
     <div class="main">
-
-      <!-- Banner visitante -->
       <div class="banner-visitante" id="banner-visitante">
         👀 Você está como visitante — apenas o criador da sala pode controlar a votação.
       </div>
@@ -274,7 +343,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 
       <!-- Cartas -->
       <div class="card">
-        <div class="sec-label">Suas cartas — clique para votar</div>
+        <div class="sec-label" id="seq-label">Suas cartas — clique para votar</div>
         <div class="cartas-wrapper" id="cartas-wrapper"></div>
       </div>
 
@@ -301,7 +370,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- SIDEBAR -->
@@ -324,7 +392,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
   </div>
 </div>
 
-<!-- Modais -->
+<!-- Modais tarefas -->
 <div class="overlay" id="modal-tarefa">
   <div class="modal">
     <h3>Nova tarefa</h3>
@@ -349,6 +417,40 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     </div>
   </div>
 </div>
+
+<!-- Modal seletor de sequência (só admin vê o botão) -->
+<div class="overlay" id="modal-sequencia">
+  <div class="modal" style="max-width:400px;">
+    <h3>🃏 Sequência de votação</h3>
+    <p class="modal-sub">Muda as cartas para todos na sala imediatamente.</p>
+    <div class="seq-opcoes" id="seq-opcoes">
+      <button class="seq-opcao" data-seq="fibonacci" onclick="trocarSequencia('fibonacci')">
+        <strong>Fibonacci</strong>
+        <span>1, 2, 3, 5, 8, 13, 21, ?</span>
+      </button>
+      <button class="seq-opcao" data-seq="fibonacci_ext" onclick="trocarSequencia('fibonacci_ext')">
+        <strong>Fibonacci Estendida</strong>
+        <span>0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?</span>
+      </button>
+      <button class="seq-opcao" data-seq="t_shirt" onclick="trocarSequencia('t_shirt')">
+        <strong>Camisetas</strong>
+        <span>XS, S, M, L, XL, XXL, ?</span>
+      </button>
+      <button class="seq-opcao" data-seq="pontos" onclick="trocarSequencia('pontos')">
+        <strong>Pontos</strong>
+        <span>1, 2, 4, 8, 16, 32, 64, ?</span>
+      </button>
+      <button class="seq-opcao" data-seq="linear" onclick="trocarSequencia('linear')">
+        <strong>Linear</strong>
+        <span>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?</span>
+      </button>
+    </div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="btn-s" onclick="fecharModals()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="modal-upload">
   <div class="modal" style="max-width:500px;">
     <h3>Importar planilha</h3>
@@ -374,7 +476,17 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 <div class="toast" id="toast"></div>
 
 <script>
-const SEQ    = [1,2,3,5,8,13,21,'?'];
+// Definição das sequências (espelho do back-end)
+const SEQUENCIAS_DEF = {
+  fibonacci:     { label: 'Fibonacci',           valores: [1,2,3,5,8,13,21,'?'] },
+  fibonacci_ext: { label: 'Fibonacci Estendida',  valores: [0,1,2,3,5,8,13,21,34,55,89,'?'] },
+  t_shirt:       { label: 'Camisetas',            valores: ['XS','S','M','L','XL','XXL','?'] },
+  pontos:        { label: 'Pontos',               valores: [1,2,4,8,16,32,64,'?'] },
+  linear:        { label: 'Linear',               valores: [1,2,3,4,5,6,7,8,9,10,'?'] },
+};
+
+const TOKEN_KEY   = 'pontua_token';
+const USUARIO_KEY = 'pontua_usuario';
 const CORES  = ['#d4ee5e','#e1edb9','#ff4242','#f4fad2','#e8d5f5','#d5edf5','#ffe0b2','#b2dfdb'];
 const CORES_T= ['#2a3a00','#2a3a00','#ffffff','#444','#6b2fa0','#1a6a7a','#7a3800','#00695c'];
 const avatarIdx={};
@@ -384,30 +496,89 @@ const H = (cls) => `<svg class="${cls}" viewBox="0 0 24 24"><path d="M12 21.35l-
 let socket, meuNome, minhaSalaId, meuId;
 let estado=null, votei=null, tarefasImport=[], metricasExpanded=true;
 let souAdmin = false;
+let sequenciaAtual = 'fibonacci';
 
-// ── SESSÃO ──
-function getUsuario() { try { return JSON.parse(localStorage.getItem('pontua_usuario')); } catch { return null; } }
-function getToken()   { return localStorage.getItem('pontua_token'); }
+function getToken()   { return localStorage.getItem(TOKEN_KEY); }
+function getUsuario() { try { return JSON.parse(localStorage.getItem(USUARIO_KEY)); } catch { return null; } }
 
+// ── DROPDOWN SALA ─────────────────────────────────────────────
+function toggleDropdownSala() {
+  const dd = document.getElementById('user-dropdown-sala');
+  dd.classList.toggle('aberto');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.user-menu-wrap-sala')) {
+    document.getElementById('user-dropdown-sala')?.classList.remove('aberto');
+  }
+});
+function sairDaConta() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USUARIO_KEY);
+  window.location.href = '/';
+}
+
+// ── NAV SALA ─────────────────────────────────────────────────
+function renderNavSala() {
+  const usuario = getUsuario();
+  const ini = meuNome ? meuNome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?';
+  document.getElementById('nav-av-sm').textContent  = ini;
+  document.getElementById('nav-nome-sm').textContent = meuNome?.split(' ')[0] || '—';
+  document.getElementById('admin-badge').style.display = souAdmin ? 'inline-block' : 'none';
+
+  if (usuario) {
+    const badge  = document.getElementById('plano-badge-sala');
+    const desc   = document.getElementById('plano-desc-sala');
+    const upLink = document.getElementById('dropdown-upgrade-sala');
+    if (usuario.plano === 'pro') {
+      badge.textContent = 'Pro'; badge.classList.add('pro');
+      desc.textContent  = 'Plano profissional';
+      upLink.style.display = 'none';
+    } else {
+      badge.textContent = 'Free'; badge.classList.remove('pro');
+      desc.textContent  = 'Plano gratuito';
+      upLink.style.display = 'flex';
+    }
+  }
+
+  document.getElementById('banner-visitante').classList.toggle('visivel', !souAdmin);
+  document.getElementById('btn-seq').style.display = souAdmin ? 'inline-flex' : 'none';
+  document.getElementById('sb-acoes-admin').style.display = souAdmin ? 'flex' : 'none';
+}
+
+// ── SEQUÊNCIA ─────────────────────────────────────────────────
+function abrirModalSequencia() {
+  if (!souAdmin) return;
+  // Marca a ativa
+  document.querySelectorAll('.seq-opcao').forEach(b => {
+    b.classList.toggle('ativa-seq', b.dataset.seq === sequenciaAtual);
+  });
+  document.getElementById('modal-sequencia').classList.add('ativo');
+}
+
+function trocarSequencia(seq) {
+  if (!souAdmin || !socket) return;
+  socket.emit('mudarSequencia', { sequencia: seq });
+  fecharModals();
+}
+
+// ── INIT ─────────────────────────────────────────────────────
 window.onload = () => {
   const parts = location.pathname.split('/');
   minhaSalaId = parts[2] || new URLSearchParams(location.search).get('sala') || '';
   const nomeUrl = new URLSearchParams(location.search).get('nome');
   const usuario = getUsuario();
 
-  // Preenche nome automaticamente se logado
   if (usuario) document.getElementById('input-nome').value = usuario.nome;
   else if (nomeUrl) document.getElementById('input-nome').value = nomeUrl;
 
   if (minhaSalaId) {
     document.getElementById('campo-codigo-wrap').style.display = 'none';
     document.getElementById('login-sub').textContent = 'Você foi convidado! Informe seu nome para entrar.';
-    // Auto-entrar se nome disponível
     if (nomeUrl || usuario) { meuNome = nomeUrl || usuario.nome; conectar(); return; }
   }
 
   ['input-nome','input-codigo'].forEach(id =>
-    document.getElementById(id).addEventListener('keydown', e => e.key === 'Enter' && entrarSala())
+    document.getElementById(id)?.addEventListener('keydown', e => e.key === 'Enter' && entrarSala())
   );
   setupUpload();
 };
@@ -428,8 +599,8 @@ function conectar() {
   socket.on('connect', () => {
     meuId = socket.id;
     socket.emit('entrar', {
-      salaId: minhaSalaId,
-      nome:   meuNome,
+      salaId:    minhaSalaId,
+      nome:      meuNome,
       usuarioId: usuario?.id || null,
     });
   });
@@ -438,13 +609,16 @@ function conectar() {
 
   socket.on('estado', s => {
     estado = s;
+    sequenciaAtual = s.sequencia || 'fibonacci';
+
     if (document.getElementById('tela-login').classList.contains('ativa')) {
       document.getElementById('tela-login').classList.remove('ativa');
       document.getElementById('tela-sala').classList.add('ativa');
       setupUpload();
     }
+
     souAdmin = s.donoSocketId === meuId;
-    renderNav();
+    renderNavSala();
     renderSala();
     renderMetricas();
   });
@@ -453,42 +627,28 @@ function conectar() {
     document.getElementById('media-val').textContent = media !== null ? media.toFixed(1) : '—';
     document.getElementById('media-box').classList.add('visivel');
     if (media) {
-      const c = [1,2,3,5,8,13,21].reduce((a,b) => Math.abs(b-media) < Math.abs(a-media) ? b : a);
-      document.getElementById('sp-select').value = c;
+      const cartas = SEQUENCIAS_DEF[sequenciaAtual]?.valores || SEQUENCIAS_DEF.fibonacci.valores;
+      const numericos = cartas.filter(v => typeof v === 'number');
+      const c = numericos.reduce((a,b) => Math.abs(b-media)<Math.abs(a-media)?b:a, numericos[0]);
+      if (c !== undefined) document.getElementById('sp-select').value = c;
     }
   });
 
-  socket.on('limiteIp', ({ restantes, limite }) => {
-    const el = document.getElementById('votos-rest');
-    el.style.display = 'inline-block';
-    el.textContent = `${restantes}/${limite} votos hoje`;
-    el.className = 'votos-rest' + (restantes <= 3 ? ' alerta' : '');
-  });
-
-  socket.on('erroVoto', ({ msg }) => toast(msg, true));
   socket.on('disconnect', () => toast('Conexão perdida. Reconectando...'));
-}
-
-function renderNav() {
-  const usuario = getUsuario();
-  const navU = document.getElementById('nav-usuario-sala');
-  if (meuNome) {
-    navU.style.display = 'flex';
-    const ini = meuNome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('nav-av-sm').textContent  = ini;
-    document.getElementById('nav-nome-sm').textContent = meuNome.split(' ')[0];
-    document.getElementById('admin-badge').style.display = souAdmin ? 'inline-block' : 'none';
-  }
-  // Banner visitante
-  document.getElementById('banner-visitante').classList.toggle('visivel', !souAdmin);
+  socket.on('erroVoto', ({ msg }) => toast(msg, true));
 }
 
 function renderSala() {
   if (!estado) return;
-  const { participantes, tarefas, tarefaAtiva, votos, revelado } = estado;
+  const { participantes, tarefas, tarefaAtiva, votos, revelado, sequencia } = estado;
+  const cartas = SEQUENCIAS_DEF[sequencia || 'fibonacci']?.valores || SEQUENCIAS_DEF.fibonacci.valores;
 
   document.getElementById('nav-sala-nome').textContent = estado.nome || `Sala ${minhaSalaId}`;
   document.getElementById('nav-badge').textContent = `${participantes.length} online`;
+
+  // Label da sequência atual
+  const seqLabel = SEQUENCIAS_DEF[sequencia || 'fibonacci']?.label || 'Fibonacci';
+  document.getElementById('seq-label').textContent = `Suas cartas (${seqLabel}) — clique para votar`;
 
   // Tarefa ativa
   const t = tarefas.find(x => x.id === tarefaAtiva);
@@ -508,7 +668,7 @@ function renderSala() {
   // Votos
   document.getElementById('votos-area').innerHTML = participantes.map(p => {
     const v = votos[p.id], idx = av(p.id);
-    const ini = p.nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const ini = p.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     let cls = 'carta-v', txt = '—';
     if (v === '?')                          { cls += ' carta-oculta'; txt = '?'; }
     else if (v !== null && v !== undefined) { cls += revelado ? '' : ' carta-oculta'; txt = revelado ? v : '✓'; }
@@ -520,24 +680,19 @@ function renderSala() {
     </div>`;
   }).join('');
 
-  // Botões de controle — só admin
+  // Botões de controle
   const br = document.getElementById('btn-revelar');
   br.disabled = revelado || !souAdmin;
   br.style.opacity = (revelado || !souAdmin) ? '.4' : '1';
   if (!revelado) document.getElementById('media-box').classList.remove('visivel');
-
-  // Botão resetar
   document.querySelector('.acoes .btn-s').disabled = !souAdmin;
 
-  // Sidebar de tarefas — acoes visíveis só para admin
-  document.getElementById('sb-acoes-admin').style.display = souAdmin ? 'flex' : 'none';
-
-  // Cartas
+  // Cartas — renderiza com a sequência atual
   const disabled = !tarefaAtiva || revelado;
-  document.getElementById('cartas-wrapper').innerHTML = SEQ.map((v, i) => {
+  document.getElementById('cartas-wrapper').innerHTML = cartas.map((v, i) => {
     const ativo = votei === i && !revelado;
     const esp   = v === '?';
-    return `<button class="carta-btn${ativo?' ativa':''}${esp?' especial':''}" onclick="votar(${i})" ${disabled?'disabled':''}>
+    return `<button class="carta-btn${ativo?' ativa':''}${esp?' especial':''}" onclick="votar(${i},'${v}')" ${disabled?'disabled':''}>
       ${H('carta-naipe tl')}${H('carta-heart-bg')}
       <span class="carta-valor">${v}</span>
       ${H('carta-naipe br')}
@@ -548,7 +703,7 @@ function renderSala() {
   document.getElementById('lista-participantes').innerHTML = participantes.map(p => {
     const votou = votos[p.id] !== null && votos[p.id] !== undefined;
     const idx   = av(p.id);
-    const ini   = p.nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const ini   = p.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     const isAdm = estado.donoSocketId === p.id;
     return `<div class="part-item">
       <div class="av" style="width:26px;height:26px;font-size:9px;background:${CORES[idx]};color:${CORES_T[idx]}">${ini}</div>
@@ -638,7 +793,11 @@ function toggleMetricas() {
 }
 
 // ── AÇÕES ──
-function votar(i)    { if (!estado?.tarefaAtiva) return; votei=i; socket.emit('votar',{valor:SEQ[i]}); }
+function votar(i, valor) {
+  if (!estado?.tarefaAtiva) return;
+  votei = i;
+  socket.emit('votar', { valor: isNaN(valor) ? valor : Number(valor) });
+}
 function revelar()   { if (!souAdmin) return; socket.emit('revelar'); }
 function resetar()   { if (!souAdmin) return; votei=null; document.getElementById('media-box').classList.remove('visivel'); socket.emit('resetar'); }
 function selTarefa(id){ if (!souAdmin) return; votei=null; socket.emit('selecionarTarefa',{tarefaId:id}); }

@@ -1,5 +1,15 @@
-const { v4: uuidv4 } = require('uuid');
-const supabase       = require('../config/db');
+/**
+ * controllers/salaController.js — v2.0
+ * Correções:
+ *  - criar() retorna { id, nome } direto (sem wrapper) — compatível com o front atual
+ *  - incrementa salas_criadas após criar com sucesso
+ *  - adiciona rota ping (anti cold-start)
+ *  - buscar() é pública (visitantes precisam verificar sala)
+ */
+
+const { v4: uuidv4 }              = require('uuid');
+const supabase                    = require('../config/db');
+const { incrementarSalasCriadas } = require('../middleware/plano');
 
 let _salas = null;
 function init(salasRef) { _salas = salasRef; }
@@ -23,6 +33,7 @@ function calcularMetricas(sala) {
   };
 }
 
+// POST /api/sala — criar sala
 async function criar(req, res) {
   try {
     const { nome }  = req.body;
@@ -37,13 +48,21 @@ async function criar(req, res) {
 
     if (error) throw error;
 
+    // Inicializa sala em memória
     _salas[id] = {
       id, nome: nomeSala,
-      donoId, donoSocketId: null, // será preenchido quando o dono entrar
+      donoId, donoSocketId: null,
       participantes: {}, tarefas: [], tarefaAtiva: null,
       votos: {}, revelado: false, historico: [],
     };
 
+    // Incrementa contador permanente (só se usuário logado)
+    if (donoId) {
+      await incrementarSalasCriadas(donoId);
+    }
+
+    // Retorna { id, nome } — compatível com o front atual
+    // O front faz: if (data.id) window.location.href = `/sala/${data.id}?nome=...`
     return res.status(201).json({ id, nome: nomeSala });
   } catch (err) {
     console.error('[sala:criar]', err);
@@ -51,6 +70,7 @@ async function criar(req, res) {
   }
 }
 
+// GET /api/sala/:id — buscar sala (PÚBLICA — visitante precisa verificar)
 async function buscar(req, res) {
   try {
     const { data: sala } = await supabase
@@ -59,7 +79,8 @@ async function buscar(req, res) {
     if (!sala) return res.status(404).json({ erro: 'Sala não encontrada.' });
 
     return res.json({
-      id: sala.id, nome: sala.nome,
+      id:           sala.id,
+      nome:         sala.nome,
       participantes: Object.values(_salas[sala.id]?.participantes || {}).length,
     });
   } catch (err) {
@@ -67,6 +88,7 @@ async function buscar(req, res) {
   }
 }
 
+// GET /api/metricas/:salaId
 async function metricas(req, res) {
   try {
     const salaId = req.params.salaId;
@@ -81,8 +103,8 @@ async function metricas(req, res) {
     const salaObj = { ...sala, tarefas: tarefas || [], historico: historico || [] };
 
     return res.json({
-      sala:      { id: sala.id, nome: sala.nome },
-      metricas:  calcularMetricas(salaObj),
+      sala:     { id: sala.id, nome: sala.nome },
+      metricas: calcularMetricas(salaObj),
       historico: historico || [],
       tarefas:   tarefas   || [],
     });
@@ -91,4 +113,9 @@ async function metricas(req, res) {
   }
 }
 
-module.exports = { init, criar, buscar, metricas, calcularMetricas };
+// GET /api/sala/ping — mantém o Render acordado (UptimeRobot chama a cada 5min)
+function ping(req, res) {
+  res.json({ ok: true, ts: Date.now() });
+}
+
+module.exports = { init, criar, buscar, metricas, ping, calcularMetricas };
