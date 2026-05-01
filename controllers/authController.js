@@ -185,12 +185,16 @@ async function reenviarCodigo(req, res) {
 async function login(req, res) {
   try {
     const { email, senha } = req.body;
+    console.log('[login] tentativa:', email);
     if (!email || !senha)
       return res.status(400).json({ erro: 'E-mail e senha são obrigatórios.' });
 
     const emailNorm = email.toLowerCase().trim();
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
+
+    console.log('[login] usuario encontrado:', !!usuario);
+    console.log('[login] email_verificado:', usuario?.email_verificado);
 
     if (!usuario)
       return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
@@ -203,6 +207,8 @@ async function login(req, res) {
       });
 
     const senhaOk = await bcrypt.compare(senha, usuario.senha_hash);
+    console.log('[login] senhaOk:', senhaOk);
+    
     if (!senhaOk)
       return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
 
@@ -217,7 +223,7 @@ async function login(req, res) {
         nome:         usuario.nome,
         email:        usuario.email,
         plano:        usuario.plano,
-        salasCriadas: usuario.salas_criadas ?? 0,  // ← front usa para exibir no menu
+        salasCriadas: usuario.salas_criadas ?? 0,
       },
       redirect: '/',
     });
@@ -226,7 +232,6 @@ async function login(req, res) {
     return res.status(500).json({ erro: 'Erro interno.' });
   }
 }
-
 // ── ESQUECI MINHA SENHA ───────────────────────────────────────
 async function esqueciSenha(req, res) {
   try {
