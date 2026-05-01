@@ -59,13 +59,6 @@ app.use(geral);
 app.use(express.static(path.join(__dirname, 'public')));
 app.disable('x-powered-by');
 
-// REMOVER APÓS TESTE
-app.get('/debug-hash', async (req, res) => {
-  const bcrypt = require('bcryptjs');
-  const hash = await bcrypt.hash('minhasenha123', 10);
-  res.json({ hash });
-});
-
 // ─────────────────────────────────────────────
 // ROTAS API
 // ─────────────────────────────────────────────
