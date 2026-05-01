@@ -12,7 +12,7 @@ const msg = (texto) => ({ erro: texto });
 const geral = rateLimit({
   windowMs: 15 * 60 * 1000, max: 300,
   standardHeaders: true, legacyHeaders: false,
-  validate: { trustProxy: false },
+  validate: { xForwardedForHeader: false },
   message: msg('Muitas requisições. Tente novamente em alguns minutos.'),
   skip: (req) => req.path === '/health',
 });
@@ -21,7 +21,7 @@ const geral = rateLimit({
 const auth = rateLimit({
   windowMs: 15 * 60 * 1000, max: 10,
   standardHeaders: true, legacyHeaders: false,
-  validate: { trustProxy: false },
+  validate: { xForwardedForHeader: false },
   message: msg('Muitas tentativas. Aguarde 15 minutos e tente novamente.'),
   skipSuccessfulRequests: true,
 });
@@ -30,7 +30,7 @@ const auth = rateLimit({
 const reenvio = rateLimit({
   windowMs: 60 * 60 * 1000, max: 3,
   standardHeaders: true, legacyHeaders: false,
-  validate: { trustProxy: false },
+  validate: { xForwardedForHeader: false },
   message: msg('Limite de reenvio atingido. Tente em 1 hora.'),
 });
 
@@ -38,7 +38,7 @@ const reenvio = rateLimit({
 const pagamento = rateLimit({
   windowMs: 60 * 60 * 1000, max: 10,
   standardHeaders: true, legacyHeaders: false,
-  validate: { trustProxy: false },
+  validate: { xForwardedForHeader: false },
   message: msg('Muitas tentativas de pagamento. Aguarde 1 hora.'),
 });
 
