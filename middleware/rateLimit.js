@@ -19,7 +19,7 @@ const geral = rateLimit({
 
 // Auth — 10 tentativas/15min (não conta requests bem-sucedidos)
 const auth = rateLimit({
-  windowMs: 15 * 60 * 1000, max: 10,
+  windowMs: 15 * 60 * 1000, max: 100,
   standardHeaders: true, legacyHeaders: false,
   validate: { xForwardedForHeader: false },
   message: msg('Muitas tentativas. Aguarde 15 minutos e tente novamente.'),
