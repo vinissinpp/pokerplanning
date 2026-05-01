@@ -189,7 +189,7 @@ async function login(req, res) {
     if (!email || !senha)
       return res.status(400).json({ erro: 'E-mail e senha são obrigatórios.' });
 
-    const emailNorm = email.toLowerCase().trim();
+    const emailNorm = normalizarEmail(email);
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
 
