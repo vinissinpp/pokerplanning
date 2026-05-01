@@ -58,7 +58,8 @@ app.use(sanitizarBody);
 app.use(geral);
 app.use(express.static(path.join(__dirname, 'public')));
 app.disable('x-powered-by');
-
+app.set('trust.proxy',1); 
+ 
 // ─────────────────────────────────────────────
 // ROTAS API
 // ─────────────────────────────────────────────
