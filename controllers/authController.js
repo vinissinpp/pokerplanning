@@ -1,10 +1,6 @@
 /**
- * controllers/authController.js — v2.0
- * Adições:
- *  - normalizarEmail() bloqueia +alias e pontos do Gmail
- *  - salva email_normalizado no banco (índice único bloqueia duplicatas)
- *  - inicializa salas_criadas: 0 no cadastro
- *  - login retorna salasCriadas para o front atualizar o localStorage
+ * controllers/authController.js — v2.1
+ * Fix: todas as buscas por email usam normalizarEmail()
  */
 
 const bcrypt                          = require('bcryptjs');
@@ -20,32 +16,23 @@ function expiracaoMin(min) {
   return new Date(Date.now() + min * 60 * 1000).toISOString();
 }
 
-// Normaliza email para bloquear contas duplicadas via +alias e pontos do Gmail
 function normalizarEmail(email) {
   if (!email || typeof email !== 'string') return '';
   const lower = email.toLowerCase().trim();
   const at = lower.lastIndexOf('@');
   if (at === -1) return lower;
-
   let local  = lower.slice(0, at);
   const dominio = lower.slice(at + 1);
-
-  // Remove alias (+tag) — funciona em Gmail, Outlook, ProtonMail, etc.
   local = local.split('+')[0];
-
-  // Remove pontos do Gmail (a.b@gmail.com === ab@gmail.com)
   if (dominio === 'gmail.com' || dominio === 'googlemail.com') {
     local = local.replace(/\./g, '');
   }
-
   return `${local}@${dominio}`;
 }
 
-// ── CADASTRO ────────────────────────────────────────────────
 async function cadastro(req, res) {
   try {
     const { nome, email, senha } = req.body;
-
     if (!nome || !email || !senha)
       return res.status(400).json({ erro: 'Nome, e-mail e senha são obrigatórios.' });
     if (senha.length < 8)
@@ -53,10 +40,9 @@ async function cadastro(req, res) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return res.status(400).json({ erro: 'E-mail inválido.' });
 
-    const emailNorm       = email.toLowerCase().trim();
-    const emailNormalizado = normalizarEmail(email);
+    const emailNorm        = normalizarEmail(email);
+    const emailNormalizado = emailNorm;
 
-    // Verifica duplicata pelo email original
     const { data: existente } = await supabase
       .from('usuarios').select('id, email_verificado').eq('email', emailNorm).single();
 
@@ -66,13 +52,11 @@ async function cadastro(req, res) {
       return res.status(409).json({ erro: 'E-mail já cadastrado. Faça login.' });
     }
 
-    // Verifica duplicata pelo email normalizado (bloqueia +alias e variações de pontos)
     const { data: existenteNorm } = await supabase
       .from('usuarios').select('id').eq('email_normalizado', emailNormalizado).maybeSingle();
 
-    if (existenteNorm) {
+    if (existenteNorm)
       return res.status(409).json({ erro: 'Este e-mail já está associado a uma conta existente.' });
-    }
 
     const senhaHash = await bcrypt.hash(senha, 12);
     const codigo    = gerarCodigo();
@@ -86,7 +70,7 @@ async function cadastro(req, res) {
         senha_hash:         senhaHash,
         plano:              'free',
         email_verificado:   false,
-        salas_criadas:      0,          // contador permanente
+        salas_criadas:      0,
         codigo_verificacao: codigo,
         codigo_expira_em:   expiracaoMin(15),
         codigo_tipo:        'confirmacao',
@@ -108,14 +92,13 @@ async function cadastro(req, res) {
   }
 }
 
-// ── CONFIRMAR E-MAIL ─────────────────────────────────────────
 async function confirmarEmail(req, res) {
   try {
     const { email, codigo } = req.body;
     if (!email || !codigo)
       return res.status(400).json({ erro: 'E-mail e código são obrigatórios.' });
 
-    const emailNorm = email.toLowerCase().trim();
+    const emailNorm = normalizarEmail(email); // ← corrigido
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
 
@@ -154,13 +137,12 @@ async function confirmarEmail(req, res) {
   }
 }
 
-// ── REENVIAR CÓDIGO ───────────────────────────────────────────
 async function reenviarCodigo(req, res) {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ erro: 'E-mail obrigatório.' });
 
-    const emailNorm = email.toLowerCase().trim();
+    const emailNorm = normalizarEmail(email); // ← corrigido
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
 
@@ -181,20 +163,15 @@ async function reenviarCodigo(req, res) {
   }
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────
 async function login(req, res) {
   try {
     const { email, senha } = req.body;
-    console.log('[login] tentativa:', email);
     if (!email || !senha)
       return res.status(400).json({ erro: 'E-mail e senha são obrigatórios.' });
 
     const emailNorm = normalizarEmail(email);
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
-
-    console.log('[login] usuario encontrado:', !!usuario);
-    console.log('[login] email_verificado:', usuario?.email_verificado);
 
     if (!usuario)
       return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
@@ -207,8 +184,6 @@ async function login(req, res) {
       });
 
     const senhaOk = await bcrypt.compare(senha, usuario.senha_hash);
-    console.log('[login] senhaOk:', senhaOk);
-    
     if (!senhaOk)
       return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
 
@@ -232,19 +207,18 @@ async function login(req, res) {
     return res.status(500).json({ erro: 'Erro interno.' });
   }
 }
-// ── ESQUECI MINHA SENHA ───────────────────────────────────────
+
 async function esqueciSenha(req, res) {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ erro: 'E-mail obrigatório.' });
 
-    const emailNorm = email.toLowerCase().trim();
+    const emailNorm = normalizarEmail(email); // ← corrigido
     const { data: usuario } = await supabase
       .from('usuarios').select('id, nome, email_verificado').eq('email', emailNorm).single();
 
-    if (!usuario || !usuario.email_verificado) {
+    if (!usuario || !usuario.email_verificado)
       return res.json({ mensagem: 'Se esse e-mail estiver cadastrado, você receberá um código.' });
-    }
 
     const codigo = gerarCodigo();
     await supabase.from('usuarios').update({
@@ -260,7 +234,6 @@ async function esqueciSenha(req, res) {
   }
 }
 
-// ── REDEFINIR SENHA ───────────────────────────────────────────
 async function redefinirSenha(req, res) {
   try {
     const { email, codigo, novaSenha } = req.body;
@@ -269,7 +242,7 @@ async function redefinirSenha(req, res) {
     if (novaSenha.length < 8)
       return res.status(400).json({ erro: 'Senha precisa ter pelo menos 8 caracteres.' });
 
-    const emailNorm = email.toLowerCase().trim();
+    const emailNorm = normalizarEmail(email); // ← corrigido
     const { data: usuario } = await supabase
       .from('usuarios').select('*').eq('email', emailNorm).single();
 
@@ -292,7 +265,6 @@ async function redefinirSenha(req, res) {
   }
 }
 
-// ── PERFIL ────────────────────────────────────────────────────
 async function perfil(req, res) {
   try {
     const { data: usuario } = await supabase
