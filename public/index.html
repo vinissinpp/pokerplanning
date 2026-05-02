@@ -448,7 +448,7 @@ function iniciais(nome) {
 }
 
 // ── NAV ─────────────────────────────────────────────────────
-function renderNav() {
+async function renderNav() {
   const usuario = getUsuario();
   const token   = getToken();
   const deslogado = document.getElementById('nav-deslogado');
@@ -460,6 +460,18 @@ function renderNav() {
 
     document.getElementById('user-initials').textContent  = iniciais(usuario.nome);
     document.getElementById('user-nome-nav').textContent  = usuario.nome.split(' ')[0];
+
+    // Busca plano atualizado do banco
+    try {
+      const res  = await fetch('/api/pagamento/status', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        usuario.plano = data.plano;
+        localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
+      }
+    } catch {}
 
     const badge   = document.getElementById('plano-badge');
     const desc    = document.getElementById('plano-desc');
@@ -477,14 +489,12 @@ function renderNav() {
       upgrade.style.display = 'flex';
     }
 
-    // Preenche nome no modal criar sala automaticamente
     document.getElementById('criar-nome').value = usuario.nome;
   } else {
     deslogado.style.display = 'flex';
     logado.style.display    = 'none';
   }
 }
-
 // ── DROPDOWN ────────────────────────────────────────────────
 function toggleDropdown() {
   const dd  = document.getElementById('user-dropdown');
