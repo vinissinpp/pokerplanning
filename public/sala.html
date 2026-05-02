@@ -518,14 +518,41 @@ function sairDaConta() {
 }
 
 // ── NAV SALA ─────────────────────────────────────────────────
-function renderNavSala() {
+async function NavSala() {
   const usuario = getUsuario();
+  const token   = getToken();
+
+  if (usuario && token) {
+    try {
+      const res = await fetch('/api/pagamento/status', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        usuario.plano = data.plano;
+        localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
+      }
+    } catch {}
+  }
+
   const ini = meuNome ? meuNome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?';
   document.getElementById('nav-av-sm').textContent  = ini;
   document.getElementById('nav-nome-sm').textContent = meuNome?.split(' ')[0] || '—';
   document.getElementById('admin-badge').style.display = souAdmin ? 'inline-block' : 'none';
 
-  if (usuario) {
+if (usuario) {
+    // Busca plano atualizado do banco
+    try {
+      const res = await fetch('/api/pagamento/status', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        usuario.plano = data.plano;
+        localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
+      }
+    } catch {}
+
     const badge  = document.getElementById('plano-badge-sala');
     const desc   = document.getElementById('plano-desc-sala');
     const upLink = document.getElementById('dropdown-upgrade-sala');
