@@ -247,9 +247,20 @@ footer { background:var(--text); border-top:1px solid rgba(255,255,255,.08); pad
 @media(max-width:900px) { .hero{ grid-template-columns:1fr; gap:2.5rem; padding:2.5rem 1.5rem; min-height:auto; } .features-grid{ grid-template-columns:1fr; } .steps{ grid-template-columns:1fr; } .step:not(:last-child)::after{ display:none; } nav{ padding:1rem 1.5rem; } .features-section,.how-section,.cta-section{ padding:3.5rem 1.5rem; } footer{ padding:1.25rem 1.5rem; flex-direction:column; text-align:center; } }
 @media(max-width:600px) { .hero-title{ font-size:38px; } .hero-ctas{ flex-direction:column; } .btn-hero-p,.btn-hero-s{ width:100%; justify-content:center; } }
 </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3194771019120752" crossorigin="anonymous"></script>
 </head>
-<body>
-
+<div id="ads-container" style="display:none">
+  <div style="position:fixed;right:0;top:50%;transform:translateY(-50%);width:160px;z-index:90;">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+  <div style="position:fixed;bottom:0;left:0;right:0;z-index:90;text-align:center;background:#f0f2eb;padding:4px 0;">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+</div>
+</body>
+  
 <!-- ══ NAV ══ -->
 <nav id="nav">
   <a class="nav-logo" href="/">
@@ -489,7 +500,9 @@ async function renderNav() {
       upgrade.style.display = 'flex';
     }
 
-    document.getElementById('criar-nome').value = usuario.nome;
+    // Mostra ads só para Free
+document.getElementById('ads-container').style.display = 
+  usuario.plano === 'pro' ? 'none' : 'block';
   } else {
     deslogado.style.display = 'flex';
     logado.style.display    = 'none';
