@@ -22,8 +22,8 @@ const PLANOS = {
   },
   pro: {
     nome:          'Pro',
-    preco:         2990, // em centavos = R$ 29,90
-    precoExibicao: 29.90,
+    preco:         990, // em centavos = R$ 9,90
+    precoExibicao: 9.90,
     limites: {
       salas:         999,
       tarefas:       999,
