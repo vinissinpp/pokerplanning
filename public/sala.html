@@ -255,7 +255,22 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 @media(max-width:960px){ .sala-body{ grid-template-columns:1fr 260px; } }
 @media(max-width:700px){ .sala-body{ grid-template-columns:1fr; padding:1rem; } .sidebar{ order:-1; } nav{ padding:.875rem 1rem; } .carta-btn{ width:54px; height:76px; } .carta-valor{ font-size:17px; } .metricas-resumo-grid{ grid-template-columns:repeat(2,1fr); } .tarefas-status{ grid-template-columns:1fr; } }
 </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3194771019120752" crossorigin="anonymous"></script>
 </head>
+
+<div id="ads-container-sala" style="display:none">
+  <!-- Lateral esquerda -->
+  <div style="position:fixed;left:0;top:50%;transform:translateY(-50%);width:160px;z-index:90;">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+  <!-- Inferior fixo -->
+  <div style="position:fixed;bottom:0;left:0;right:0;z-index:90;text-align:center;background:#f0f2eb;padding:4px 0;">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+</div>
+
 <body>
 
 <!-- ══ LOGIN ══ -->
@@ -565,7 +580,9 @@ if (usuario) {
       desc.textContent  = 'Plano gratuito';
       upLink.style.display = 'flex';
     }
-  }
+  // Mostra ads só para Free — AQUI
+document.getElementById('ads-container-sala').style.display =
+  usuario.plano === 'pro' ? 'none' : 'block';
 
   document.getElementById('banner-visitante').classList.toggle('visivel', !souAdmin);
   document.getElementById('btn-seq').style.display = souAdmin ? 'inline-flex' : 'none';
