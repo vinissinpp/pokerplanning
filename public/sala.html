@@ -9,6 +9,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3194771019120752" crossorigin="anonymous"></script>
 <style>
 :root {
   --c1:#ff4242; --c1d:#cc2e2e;
@@ -55,27 +56,13 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .btn-nav{ background:none; border:1px solid var(--c4); padding:6px 12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; color:var(--textm); transition:all .15s; display:inline-flex; align-items:center; gap:5px; }
 .btn-nav:hover{ background:var(--c4); color:var(--text); }
 
-/* Menu dropdown do usuário na sala */
 .user-menu-wrap-sala { position:relative; }
-.user-avatar-btn-sala {
-  display:flex; align-items:center; gap:7px;
-  background:var(--c5); border:1.5px solid var(--c4);
-  border-radius:999px; padding:4px 12px 4px 5px;
-  cursor:pointer; font-family:inherit; font-size:12px;
-  color:var(--text); transition:all .15s;
-}
+.user-avatar-btn-sala { display:flex; align-items:center; gap:7px; background:var(--c5); border:1.5px solid var(--c4); border-radius:999px; padding:4px 12px 4px 5px; cursor:pointer; font-family:inherit; font-size:12px; color:var(--text); transition:all .15s; }
 .user-avatar-btn-sala:hover { border-color:#bbc890; background:var(--c2); }
 .nav-av-sm { width:24px; height:24px; border-radius:50%; background:var(--c1); color:#fff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; }
 .admin-badge { font-size:10px; background:var(--c1); color:#fff; padding:2px 7px; border-radius:8px; font-weight:600; }
 .chevron-sm { width:10px; height:10px; opacity:.5; }
-
-.user-dropdown-sala {
-  display:none; position:absolute; top:calc(100% + 8px); right:0;
-  min-width:210px; background:var(--white);
-  border:1px solid #e8e8e8; border-radius:var(--radius);
-  box-shadow:0 8px 24px rgba(0,0,0,.10); z-index:1000; overflow:hidden;
-  animation:dropIn .15s ease;
-}
+.user-dropdown-sala { display:none; position:absolute; top:calc(100% + 8px); right:0; min-width:210px; background:var(--white); border:1px solid #e8e8e8; border-radius:var(--radius); box-shadow:0 8px 24px rgba(0,0,0,.10); z-index:1000; overflow:hidden; animation:dropIn .15s ease; }
 .user-dropdown-sala.aberto { display:block; }
 @keyframes dropIn { from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);} }
 .dropdown-plano-sala { padding:12px 14px; display:flex; align-items:center; gap:10px; background:#fafafa; }
@@ -83,27 +70,14 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .plano-badge-sala.pro { background:var(--c3); color:#2a4000; }
 .plano-desc-sala { font-size:12px; color:#888; }
 .dropdown-divider { height:1px; background:#f0f0f0; }
-.dropdown-item-sala {
-  display:flex; align-items:center; gap:9px;
-  padding:10px 14px; font-size:13px; color:#333;
-  text-decoration:none; background:none; border:none;
-  width:100%; text-align:left; cursor:pointer;
-  font-family:inherit; transition:background .12s;
-}
+.dropdown-item-sala { display:flex; align-items:center; gap:9px; padding:10px 14px; font-size:13px; color:#333; text-decoration:none; background:none; border:none; width:100%; text-align:left; cursor:pointer; font-family:inherit; transition:background .12s; }
 .dropdown-item-sala:hover { background:#f5f5f5; }
 .dropdown-item-sala.upgrade-sala { color:var(--c1); font-weight:500; }
 .dropdown-item-sala.upgrade-sala:hover { background:#fff0f0; }
 .dropdown-item-sala.sair-sala { color:#666; }
 
-/* Modal seletor de sequência */
 .seq-opcoes { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
-.seq-opcao {
-  display:flex; flex-direction:column; gap:2px;
-  text-align:left; padding:11px 14px;
-  border:1.5px solid var(--c4); border-radius:10px;
-  background:var(--white); cursor:pointer;
-  font-family:inherit; transition:all .15s;
-}
+.seq-opcao { display:flex; flex-direction:column; gap:2px; text-align:left; padding:11px 14px; border:1.5px solid var(--c4); border-radius:10px; background:var(--white); cursor:pointer; font-family:inherit; transition:all .15s; }
 .seq-opcao:hover { border-color:var(--c1); background:#fff8f8; }
 .seq-opcao.ativa-seq { border-color:var(--c1); background:#fff0f0; }
 .seq-opcao strong { font-size:13px; color:#222; }
@@ -115,7 +89,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .card{ background:var(--white); border:1px solid var(--c4); border-radius:var(--radius); padding:1.1rem 1.25rem; }
 .sec-label{ font-size:10px; font-weight:600; color:var(--texts); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
 
-/* ── TAREFA ATIVA ── */
 .tarefa-ativa-wrap{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
 .tarefa-nome{ font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:3px; }
 .tarefa-desc{ font-size:12px; color:var(--textm); line-height:1.5; }
@@ -159,7 +132,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .carta-btn.especial .carta-valor{ font-size:26px; color:var(--textm); }
 .carta-btn.especial:hover:not(:disabled) .carta-valor,.carta-btn.especial.ativa .carta-valor{ color:var(--c1); }
 
-/* ══ MÉTRICAS INTEGRADAS ══ */
+/* ══ MÉTRICAS ══ */
 .metricas-section{ border-top:2px solid var(--c4); margin-top:8px; padding-top:16px; }
 .metricas-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; cursor:pointer; }
 .metricas-header h3{ font-family:'Syne',sans-serif; font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
@@ -225,7 +198,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .dot.ok{ background:var(--c3); border:1px solid #aad020; }
 .dot.cur{ background:var(--c1); }
 
-/* ── BANNER NÃO-ADMIN ── */
 .banner-visitante{ background:var(--c2); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:8px 14px; font-size:12px; color:#2a3a00; display:none; align-items:center; gap:8px; margin-bottom:4px; }
 .banner-visitante.visivel{ display:flex; }
 
@@ -252,25 +224,15 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .toast.show{ opacity:1; }
 .toast.erro{ background:var(--c1); }
 
+/* ── ADS ── */
+#ads-container-sala { display:none; }
+.ad-lateral-esq { position:fixed; left:0; top:50%; transform:translateY(-50%); width:160px; z-index:40; }
+.ad-inferior { position:fixed; bottom:0; left:0; right:0; z-index:40; text-align:center; background:#f0f2eb; padding:4px 0; }
+
 @media(max-width:960px){ .sala-body{ grid-template-columns:1fr 260px; } }
-@media(max-width:700px){ .sala-body{ grid-template-columns:1fr; padding:1rem; } .sidebar{ order:-1; } nav{ padding:.875rem 1rem; } .carta-btn{ width:54px; height:76px; } .carta-valor{ font-size:17px; } .metricas-resumo-grid{ grid-template-columns:repeat(2,1fr); } .tarefas-status{ grid-template-columns:1fr; } }
+@media(max-width:700px){ .sala-body{ grid-template-columns:1fr; padding:1rem; } .sidebar{ order:-1; } nav{ padding:.875rem 1rem; } .carta-btn{ width:54px; height:76px; } .carta-valor{ font-size:17px; } .metricas-resumo-grid{ grid-template-columns:repeat(2,1fr); } .tarefas-status{ grid-template-columns:1fr; } .ad-lateral-esq{ display:none !important; } }
 </style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3194771019120752" crossorigin="anonymous"></script>
 </head>
-
-<div id="ads-container-sala" style="display:none">
-  <!-- Lateral esquerda -->
-  <div style="position:fixed;left:0;top:50%;transform:translateY(-50%);width:160px;z-index:90;">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
-  <!-- Inferior fixo -->
-  <div style="position:fixed;bottom:0;left:0;right:0;z-index:90;text-align:center;background:#f0f2eb;padding:4px 0;">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
-</div>
-
 <body>
 
 <!-- ══ LOGIN ══ -->
@@ -280,7 +242,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     <h2 id="login-titulo">Entrar na sala</h2>
     <p id="login-sub">Informe seu nome para participar da votação.</p>
     <div class="field"><label>Seu nome</label><input type="text" id="input-nome" placeholder="Ex: Ana Lima" maxlength="30"/></div>
-    <div id="campo-codigo-wrap" class="field"><label>Código da sala</label><input type="text" id="input-codigo" placeholder="Ex: abc-123-xyz" maxlength="200"/></div>
+    <div id="campo-codigo-wrap" class="field" style="display:none"><label>Código da sala</label><input type="text" id="input-codigo" placeholder="Ex: abc-123-xyz" maxlength="200"/></div>
     <div class="erro-msg" id="login-erro"></div>
     <button class="btn-p" onclick="entrarSala()">Entrar na sala →</button>
     <div style="text-align:center;margin-top:14px;"><a href="/" style="font-size:13px;color:var(--c1);">← Voltar ao início</a></div>
@@ -294,21 +256,14 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     <div class="nav-sala" id="nav-sala-nome">—</div>
     <div class="nav-dir">
       <span class="nav-badge" id="nav-badge">0 online</span>
-
-      <!-- Botão de trocar sequência (só admin) -->
       <button class="btn-nav" id="btn-seq" onclick="abrirModalSequencia()" style="display:none">🃏 Sequência</button>
-
-      <!-- Menu dropdown do usuário -->
       <div class="user-menu-wrap-sala">
         <button class="user-avatar-btn-sala" id="user-avatar-btn-sala" onclick="toggleDropdownSala()">
           <div class="nav-av-sm" id="nav-av-sm">?</div>
           <span id="nav-nome-sm">—</span>
           <span class="admin-badge" id="admin-badge" style="display:none">admin</span>
-          <svg class="chevron-sm" viewBox="0 0 12 12" fill="none">
-            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+          <svg class="chevron-sm" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
-
         <div class="user-dropdown-sala" id="user-dropdown-sala">
           <div class="dropdown-plano-sala">
             <span class="plano-badge-sala" id="plano-badge-sala">Free</span>
@@ -321,7 +276,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
           <button class="dropdown-item-sala sair-sala" onclick="sairDaConta()">→ Sair da conta</button>
         </div>
       </div>
-
       <button class="btn-nav" onclick="copiarLink()">🔗 Copiar link</button>
     </div>
   </nav>
@@ -331,8 +285,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
       <div class="banner-visitante" id="banner-visitante">
         👀 Você está como visitante — apenas o criador da sala pode controlar a votação.
       </div>
-
-      <!-- Tarefa ativa -->
       <div class="card">
         <div class="sec-label">Tarefa ativa</div>
         <div class="tarefa-ativa-wrap">
@@ -355,14 +307,10 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
           </div>
         </div>
       </div>
-
-      <!-- Cartas -->
       <div class="card">
         <div class="sec-label" id="seq-label">Suas cartas — clique para votar</div>
         <div class="cartas-wrapper" id="cartas-wrapper"></div>
       </div>
-
-      <!-- Métricas integradas -->
       <div class="card">
         <div class="metricas-section">
           <div class="metricas-header" onclick="toggleMetricas()">
@@ -386,8 +334,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
         </div>
       </div>
     </div>
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="card">
         <div class="sec-label">Participantes</div>
@@ -407,7 +353,17 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
   </div>
 </div>
 
-<!-- Modais tarefas -->
+<!-- ADS — só Free -->
+<div id="ads-container-sala">
+  <div class="ad-lateral-esq">
+    <ins class="adsbygoogle" style="display:block;width:160px;min-height:600px" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto"></ins>
+  </div>
+  <div class="ad-inferior">
+    <ins class="adsbygoogle" style="display:block;width:100%;min-height:90px" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto"></ins>
+  </div>
+</div>
+
+<!-- Modais -->
 <div class="overlay" id="modal-tarefa">
   <div class="modal">
     <h3>Nova tarefa</h3>
@@ -432,44 +388,24 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     </div>
   </div>
 </div>
-
-<!-- Modal seletor de sequência (só admin vê o botão) -->
 <div class="overlay" id="modal-sequencia">
   <div class="modal" style="max-width:400px;">
     <h3>🃏 Sequência de votação</h3>
     <p class="modal-sub">Muda as cartas para todos na sala imediatamente.</p>
     <div class="seq-opcoes" id="seq-opcoes">
-      <button class="seq-opcao" data-seq="fibonacci" onclick="trocarSequencia('fibonacci')">
-        <strong>Fibonacci</strong>
-        <span>1, 2, 3, 5, 8, 13, 21, ?</span>
-      </button>
-      <button class="seq-opcao" data-seq="fibonacci_ext" onclick="trocarSequencia('fibonacci_ext')">
-        <strong>Fibonacci Estendida</strong>
-        <span>0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?</span>
-      </button>
-      <button class="seq-opcao" data-seq="t_shirt" onclick="trocarSequencia('t_shirt')">
-        <strong>Camisetas</strong>
-        <span>XS, S, M, L, XL, XXL, ?</span>
-      </button>
-      <button class="seq-opcao" data-seq="pontos" onclick="trocarSequencia('pontos')">
-        <strong>Pontos</strong>
-        <span>1, 2, 4, 8, 16, 32, 64, ?</span>
-      </button>
-      <button class="seq-opcao" data-seq="linear" onclick="trocarSequencia('linear')">
-        <strong>Linear</strong>
-        <span>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?</span>
-      </button>
+      <button class="seq-opcao" data-seq="fibonacci" onclick="trocarSequencia('fibonacci')"><strong>Fibonacci</strong><span>1, 2, 3, 5, 8, 13, 21, ?</span></button>
+      <button class="seq-opcao" data-seq="fibonacci_ext" onclick="trocarSequencia('fibonacci_ext')"><strong>Fibonacci Estendida</strong><span>0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?</span></button>
+      <button class="seq-opcao" data-seq="t_shirt" onclick="trocarSequencia('t_shirt')"><strong>Camisetas</strong><span>XS, S, M, L, XL, XXL, ?</span></button>
+      <button class="seq-opcao" data-seq="pontos" onclick="trocarSequencia('pontos')"><strong>Pontos</strong><span>1, 2, 4, 8, 16, 32, 64, ?</span></button>
+      <button class="seq-opcao" data-seq="linear" onclick="trocarSequencia('linear')"><strong>Linear</strong><span>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?</span></button>
     </div>
-    <div class="modal-btns" style="margin-top:16px;">
-      <button class="btn-s" onclick="fecharModals()">Fechar</button>
-    </div>
+    <div class="modal-btns" style="margin-top:16px;"><button class="btn-s" onclick="fecharModals()">Fechar</button></div>
   </div>
 </div>
-
 <div class="overlay" id="modal-upload">
   <div class="modal" style="max-width:500px;">
     <h3>Importar planilha</h3>
-    <div class="modelo-hint"><span>💡</span><div>Colunas: <strong>nome</strong> (obrigatório), <strong>descricao</strong> e <strong>responsavel</strong> (opcionais).</div></div>
+    <div class="modelo-hint"><span>💡</span><div>Colunas aceitas: <strong>nome</strong> (obrigatório), <strong>descricao</strong> e <strong>responsavel</strong> (opcionais). A ordem das colunas não importa.</div></div>
     <div class="upload-area" id="upload-area" onclick="document.getElementById('input-arquivo').click()">
       <div style="font-size:28px;">📂</div>
       <p>Clique para selecionar ou arraste o arquivo aqui</p>
@@ -491,7 +427,6 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 <div class="toast" id="toast"></div>
 
 <script>
-// Definição das sequências (espelho do back-end)
 const SEQUENCIAS_DEF = {
   fibonacci:     { label: 'Fibonacci',           valores: [1,2,3,5,8,13,21,'?'] },
   fibonacci_ext: { label: 'Fibonacci Estendida',  valores: [0,1,2,3,5,8,13,21,34,55,89,'?'] },
@@ -502,9 +437,9 @@ const SEQUENCIAS_DEF = {
 
 const TOKEN_KEY   = 'pontua_token';
 const USUARIO_KEY = 'pontua_usuario';
-const CORES  = ['#d4ee5e','#e1edb9','#ff4242','#f4fad2','#e8d5f5','#d5edf5','#ffe0b2','#b2dfdb'];
-const CORES_T= ['#2a3a00','#2a3a00','#ffffff','#444','#6b2fa0','#1a6a7a','#7a3800','#00695c'];
-const avatarIdx={};
+const CORES   = ['#d4ee5e','#e1edb9','#ff4242','#f4fad2','#e8d5f5','#d5edf5','#ffe0b2','#b2dfdb'];
+const CORES_T = ['#2a3a00','#2a3a00','#ffffff','#444','#6b2fa0','#1a6a7a','#7a3800','#00695c'];
+const avatarIdx = {};
 function av(id){ if(avatarIdx[id]===undefined) avatarIdx[id]=Object.keys(avatarIdx).length%CORES.length; return avatarIdx[id]; }
 const H = (cls) => `<svg class="${cls}" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#2a7a4a"/></svg>`;
 
@@ -516,10 +451,9 @@ let sequenciaAtual = 'fibonacci';
 function getToken()   { return localStorage.getItem(TOKEN_KEY); }
 function getUsuario() { try { return JSON.parse(localStorage.getItem(USUARIO_KEY)); } catch { return null; } }
 
-// ── DROPDOWN SALA ─────────────────────────────────────────────
+// ── DROPDOWN ──
 function toggleDropdownSala() {
-  const dd = document.getElementById('user-dropdown-sala');
-  dd.classList.toggle('aberto');
+  document.getElementById('user-dropdown-sala').classList.toggle('aberto');
 }
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.user-menu-wrap-sala')) {
@@ -532,35 +466,22 @@ function sairDaConta() {
   window.location.href = '/';
 }
 
-// ── NAV SALA ─────────────────────────────────────────────────
-async function NavSala() {
+// ── NAV SALA ──
+async function renderNavSala() {
   const usuario = getUsuario();
   const token   = getToken();
 
-  if (usuario && token) {
-    try {
-      const res = await fetch('/api/pagamento/status', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        usuario.plano = data.plano;
-        localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
-      }
-    } catch {}
-  }
-
   const ini = meuNome ? meuNome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?';
-  document.getElementById('nav-av-sm').textContent  = ini;
+  document.getElementById('nav-av-sm').textContent   = ini;
   document.getElementById('nav-nome-sm').textContent = meuNome?.split(' ')[0] || '—';
   document.getElementById('admin-badge').style.display = souAdmin ? 'inline-block' : 'none';
+  document.getElementById('banner-visitante').classList.toggle('visivel', !souAdmin);
+  document.getElementById('btn-seq').style.display = souAdmin ? 'inline-flex' : 'none';
+  document.getElementById('sb-acoes-admin').style.display = souAdmin ? 'flex' : 'none';
 
-if (usuario) {
-    // Busca plano atualizado do banco
+  if (usuario && token) {
     try {
-      const res = await fetch('/api/pagamento/status', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetch('/api/pagamento/status', { headers: { 'Authorization': 'Bearer ' + token } });
       if (res.ok) {
         const data = await res.json();
         usuario.plano = data.plano;
@@ -571,6 +492,7 @@ if (usuario) {
     const badge  = document.getElementById('plano-badge-sala');
     const desc   = document.getElementById('plano-desc-sala');
     const upLink = document.getElementById('dropdown-upgrade-sala');
+
     if (usuario.plano === 'pro') {
       badge.textContent = 'Pro'; badge.classList.add('pro');
       desc.textContent  = 'Plano profissional';
@@ -580,32 +502,35 @@ if (usuario) {
       desc.textContent  = 'Plano gratuito';
       upLink.style.display = 'flex';
     }
-  // Mostra ads só para Free — AQUI
-document.getElementById('ads-container-sala').style.display =
-  usuario.plano === 'pro' ? 'none' : 'block';
 
-  document.getElementById('banner-visitante').classList.toggle('visivel', !souAdmin);
-  document.getElementById('btn-seq').style.display = souAdmin ? 'inline-flex' : 'none';
-  document.getElementById('sb-acoes-admin').style.display = souAdmin ? 'flex' : 'none';
+    // Mostra ads só para Free
+    if (usuario.plano !== 'pro') {
+      const container = document.getElementById('ads-container-sala');
+      container.style.display = 'block';
+      setTimeout(() => {
+        document.querySelectorAll('#ads-container-sala .adsbygoogle').forEach(() => {
+          try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+        });
+      }, 300);
+    }
+  }
 }
 
-// ── SEQUÊNCIA ─────────────────────────────────────────────────
+// ── SEQUÊNCIA ──
 function abrirModalSequencia() {
   if (!souAdmin) return;
-  // Marca a ativa
   document.querySelectorAll('.seq-opcao').forEach(b => {
     b.classList.toggle('ativa-seq', b.dataset.seq === sequenciaAtual);
   });
   document.getElementById('modal-sequencia').classList.add('ativo');
 }
-
 function trocarSequencia(seq) {
   if (!souAdmin || !socket) return;
   socket.emit('mudarSequencia', { sequencia: seq });
   fecharModals();
 }
 
-// ── INIT ─────────────────────────────────────────────────────
+// ── INIT ──
 window.onload = () => {
   const parts = location.pathname.split('/');
   minhaSalaId = parts[2] || new URLSearchParams(location.search).get('sala') || '';
@@ -616,14 +541,21 @@ window.onload = () => {
   else if (nomeUrl) document.getElementById('input-nome').value = nomeUrl;
 
   if (minhaSalaId) {
+    // Tem ID na URL — esconde campo de código
     document.getElementById('campo-codigo-wrap').style.display = 'none';
     document.getElementById('login-sub').textContent = 'Você foi convidado! Informe seu nome para entrar.';
-    if (nomeUrl || usuario) { meuNome = nomeUrl || usuario.nome; conectar(); return; }
+    if (nomeUrl || usuario) {
+      meuNome = nomeUrl || usuario.nome;
+      conectar();
+      return;
+    }
+  } else {
+    // Sem ID na URL — mostra campo de código
+    document.getElementById('campo-codigo-wrap').style.display = 'block';
   }
 
-  ['input-nome','input-codigo'].forEach(id =>
-    document.getElementById(id)?.addEventListener('keydown', e => e.key === 'Enter' && entrarSala())
-  );
+  document.getElementById('input-nome')?.addEventListener('keydown', e => e.key === 'Enter' && entrarSala());
+  document.getElementById('input-codigo')?.addEventListener('keydown', e => e.key === 'Enter' && entrarSala());
   setupUpload();
 };
 
@@ -654,13 +586,11 @@ function conectar() {
   socket.on('estado', s => {
     estado = s;
     sequenciaAtual = s.sequencia || 'fibonacci';
-
     if (document.getElementById('tela-login').classList.contains('ativa')) {
       document.getElementById('tela-login').classList.remove('ativa');
       document.getElementById('tela-sala').classList.add('ativa');
       setupUpload();
     }
-
     souAdmin = s.donoSocketId === meuId;
     renderNavSala();
     renderSala();
@@ -690,11 +620,9 @@ function renderSala() {
   document.getElementById('nav-sala-nome').textContent = estado.nome || `Sala ${minhaSalaId}`;
   document.getElementById('nav-badge').textContent = `${participantes.length} online`;
 
-  // Label da sequência atual
   const seqLabel = SEQUENCIAS_DEF[sequencia || 'fibonacci']?.label || 'Fibonacci';
   document.getElementById('seq-label').textContent = `Suas cartas (${seqLabel}) — clique para votar`;
 
-  // Tarefa ativa
   const t = tarefas.find(x => x.id === tarefaAtiva);
   const infoEl = document.getElementById('tarefa-info');
   const btnEd  = document.getElementById('btn-editar-tarefa');
@@ -709,7 +637,6 @@ function renderSala() {
     btnEd.style.display = 'none';
   }
 
-  // Votos
   document.getElementById('votos-area').innerHTML = participantes.map(p => {
     const v = votos[p.id], idx = av(p.id);
     const ini = p.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -724,14 +651,12 @@ function renderSala() {
     </div>`;
   }).join('');
 
-  // Botões de controle
   const br = document.getElementById('btn-revelar');
   br.disabled = revelado || !souAdmin;
   br.style.opacity = (revelado || !souAdmin) ? '.4' : '1';
   if (!revelado) document.getElementById('media-box').classList.remove('visivel');
   document.querySelector('.acoes .btn-s').disabled = !souAdmin;
 
-  // Cartas — renderiza com a sequência atual
   const disabled = !tarefaAtiva || revelado;
   document.getElementById('cartas-wrapper').innerHTML = cartas.map((v, i) => {
     const ativo = votei === i && !revelado;
@@ -743,7 +668,6 @@ function renderSala() {
     </button>`;
   }).join('');
 
-  // Participantes
   document.getElementById('lista-participantes').innerHTML = participantes.map(p => {
     const votou = votos[p.id] !== null && votos[p.id] !== undefined;
     const idx   = av(p.id);
@@ -756,7 +680,6 @@ function renderSala() {
     </div>`;
   }).join('');
 
-  // Lista tarefas
   const lt = document.getElementById('lista-tarefas');
   if (!tarefas.length) { lt.innerHTML = '<div style="font-size:12px;color:var(--texts);font-style:italic;">Nenhuma tarefa ainda.</div>'; return; }
   lt.innerHTML = tarefas.map(t => `
@@ -770,7 +693,6 @@ function renderSala() {
 function renderMetricas() {
   if (!estado) return;
   const { tarefas, historico } = estado;
-
   const porColab = {};
   let totalSprint = 0, totalConcluidas = 0;
   tarefas.forEach(t => {
@@ -792,8 +714,8 @@ function renderMetricas() {
   document.getElementById('met-badge').textContent      = historico?.length || 0;
 
   const maxPts  = colaboradores[0]?.pontos || 1;
-  const colabEl = document.getElementById('met-colab-lista');
-  colabEl.innerHTML = !colaboradores.length ? '<div class="vazio-met">Nenhuma tarefa concluída ainda.</div>'
+  document.getElementById('met-colab-lista').innerHTML = !colaboradores.length
+    ? '<div class="vazio-met">Nenhuma tarefa concluída ainda.</div>'
     : colaboradores.map((c,i) => {
       const pct = Math.round((c.pontos/maxPts)*100);
       const ini = c.nome.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -806,8 +728,8 @@ function renderMetricas() {
     }).join('');
 
   const histArr = historico ? [...historico].reverse() : [];
-  const histEl  = document.getElementById('met-historico');
-  histEl.innerHTML = !histArr.length ? '<div class="vazio-met">Nenhuma votação registrada ainda.</div>'
+  document.getElementById('met-historico').innerHTML = !histArr.length
+    ? '<div class="vazio-met">Nenhuma votação registrada ainda.</div>'
     : histArr.map(h => {
       const votosHtml = Object.entries(h.votos||{}).map(([nome,val]) =>
         `<div class="voto-chip"><span>${esc(nome)}</span><span class="voto-chip-val">${val}</span></div>`).join('');
@@ -820,8 +742,8 @@ function renderMetricas() {
       </div>`;
     }).join('');
 
-  const tEl = document.getElementById('met-tarefas');
-  tEl.innerHTML = !tarefas.length ? '<div class="vazio-met">Nenhuma tarefa cadastrada.</div>'
+  document.getElementById('met-tarefas').innerHTML = !tarefas.length
+    ? '<div class="vazio-met">Nenhuma tarefa cadastrada.</div>'
     : tarefas.map(t => `<div class="ts-item${t.pontos!==null?' ok':''}">
         <div class="ts-dot${t.pontos!==null?' ok':''}"></div>
         <div style="flex:1;min-width:0;"><div class="ts-nome">${esc(t.nome)}</div>
@@ -836,7 +758,6 @@ function toggleMetricas() {
   document.getElementById('btn-toggle-met').textContent = metricasExpanded ? '▾ Recolher' : '▸ Expandir';
 }
 
-// ── AÇÕES ──
 function votar(i, valor) {
   if (!estado?.tarefaAtiva) return;
   votei = i;
@@ -851,7 +772,6 @@ function salvarResultado() {
   votei=null; document.getElementById('media-box').classList.remove('visivel');
 }
 
-// ── MODAIS TAREFAS ──
 function abrirModalTarefa() {
   if (!souAdmin) return;
   fecharModals();
@@ -883,7 +803,6 @@ function salvarEdicao() {
   fecharModals();
 }
 
-// ── UPLOAD ──
 function setupUpload() {
   const ua = document.getElementById('upload-area');
   if (!ua) return;
@@ -932,7 +851,6 @@ function importarTarefas() {
   fecharModals();
 }
 
-// ── UTILS ──
 function fecharModals(){ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('ativo')); }
 document.addEventListener('click',e=>{if(e.target.classList.contains('overlay'))fecharModals();});
 function copiarLink(){ navigator.clipboard.writeText(`${location.origin}/sala/${minhaSalaId}`).then(()=>toast('Link copiado!')); }
