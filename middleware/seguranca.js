@@ -37,13 +37,13 @@ const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'pagead2.googlesyndication.com', 'googleads.g.doubleclick.net'],
       styleSrc:    ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
       fontSrc:     ["'self'", 'fonts.gstatic.com'],
       connectSrc:  ["'self'", 'wss:', 'ws:', process.env.SUPABASE_URL].filter(Boolean),
       imgSrc:      ["'self'", 'data:'],
-      frameSrc:    ["'none'"],
+      frameSrc: ["'self'", 'googleads.g.doubleclick.net', 'tpc.googlesyndication.com'],
       objectSrc:   ["'none'"],
     },
   },
