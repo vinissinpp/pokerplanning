@@ -37,7 +37,7 @@ const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:  ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'pagead2.googlesyndication.com', 'googleads.g.doubleclick.net'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'pagead2.googlesyndication.com', 'googleads.g.doubleclick.net', 'https://ep2.adtrafficquality.google', 'https://ep1.adtrafficquality.google', 'https://*.googlesyndication.com', 'https://*.doubleclick.net'],
       styleSrc:    ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
       fontSrc:     ["'self'", 'fonts.gstatic.com'],
