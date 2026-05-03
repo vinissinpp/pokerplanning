@@ -250,15 +250,24 @@ footer { background:var(--text); border-top:1px solid rgba(255,255,255,.08); pad
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3194771019120752" crossorigin="anonymous"></script>
 </head>
 <div id="ads-container" style="display:none">
+  <!-- Lateral direita -->
   <div style="position:fixed;right:0;top:50%;transform:translateY(-50%);width:160px;z-index:90;">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;min-height:600px"
+         data-ad-client="ca-pub-3194771019120752"
+         data-ad-slot="auto"
+         data-ad-format="auto"></ins>
   </div>
+  <!-- Inferior fixo -->
   <div style="position:fixed;bottom:0;left:0;right:0;z-index:90;text-align:center;background:#f0f2eb;padding:4px 0;">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3194771019120752" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <ins class="adsbygoogle"
+         style="display:block;width:100%;min-height:90px"
+         data-ad-client="ca-pub-3194771019120752"
+         data-ad-slot="auto"
+         data-ad-format="auto"></ins>
   </div>
 </div>
+  
 </body>
   
 <!-- ══ NAV ══ -->
@@ -500,9 +509,16 @@ async function renderNav() {
       upgrade.style.display = 'flex';
     }
 
-    // Mostra ads só para Free
-document.getElementById('ads-container').style.display = 
-  usuario.plano === 'pro' ? 'none' : 'block';
+   // Mostra ads só para Free
+if (usuario.plano !== 'pro') {
+  const container = document.getElementById('ads-container');
+  container.style.display = 'block';
+  setTimeout(() => {
+    document.querySelectorAll('.adsbygoogle').forEach(() => {
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+    });
+  }, 300);
+}
   } else {
     deslogado.style.display = 'flex';
     logado.style.display    = 'none';
