@@ -43,7 +43,7 @@ const helmetConfig = helmet({
       fontSrc:     ["'self'", 'fonts.gstatic.com'],
       connectSrc: ["'self'", 'wss:', 'ws:', process.env.SUPABASE_URL, 'https://googleads.g.doubleclick.net', 'https://pagead2.googlesyndication.com', 'https://ep1.adtrafficquality.google'].filter(Boolean),
       imgSrc: ["'self'", 'data:', 'https://googleads.g.doubleclick.net', 'https://pagead2.googlesyndication.com', 'https://*.google.com'],
-      frameSrc: ["'self'", 'googleads.g.doubleclick.net', 'tpc.googlesyndication.com'],
+      frameSrc: ["'self'", 'googleads.g.doubleclick.net', 'tpc.googlesyndication.com', 'https://ep2.adtrafficquality.google', 'https://ep1.adtrafficquality.google', 'https://*.googlesyndication.com', 'https://*.doubleclick.net', 'https://www.google.com'],
       objectSrc:   ["'none'"],
     },
   },
