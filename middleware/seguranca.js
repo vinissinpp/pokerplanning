@@ -13,6 +13,8 @@ const { body, param, validationResult } = require('express-validator');
 const origensPermitidas = [
   process.env.APP_URL,
   process.env.CORS_ORIGIN,
+  'https://www.pontuaplanning.com',
+  'https://pontuaplanning.com',
   'http://localhost:3000',
   'http://localhost:3001',
 ].filter(Boolean);
