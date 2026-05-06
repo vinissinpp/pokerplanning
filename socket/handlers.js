@@ -107,6 +107,17 @@ function registrar(io, salas) {
 
       const sala = salas[salaId];
 
+      // Remove sessão anterior do mesmo usuário (reconexão ou múltiplas abas)
+      if (usuarioId) {
+        const socketAntigo = Object.keys(sala.participantes).find(
+          sid => sala.participantes[sid].usuarioId === usuarioId
+        );
+        if (socketAntigo && socketAntigo !== socket.id) {
+          delete sala.participantes[socketAntigo];
+          delete sala.votos[socketAntigo];
+        }
+      }
+
       // Verifica limite de participantes do plano do dono
       const limites = LIMITES[sala.planoOwner || 'free'];
       if (Object.keys(sala.participantes).length >= limites.participantes) {
@@ -116,7 +127,7 @@ function registrar(io, salas) {
 
       socket.join(salaId);
       socket.data = { salaId, nome: nome.trim(), usuarioId: usuarioId || null };
-      sala.participantes[socket.id] = { id: socket.id, nome: nome.trim() };
+      sala.participantes[socket.id] = { id: socket.id, nome: nome.trim(), usuarioId: usuarioId || null };
 
       // Reconecta admin: dono logado reconecta pelo usuarioId
       if (usuarioId && sala.donoId && String(usuarioId) === String(sala.donoId)) {
