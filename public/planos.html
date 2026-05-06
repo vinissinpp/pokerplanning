@@ -67,6 +67,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
 .btn-cancelar{background:none;border:none;color:var(--textm);font-size:13px;cursor:pointer;text-decoration:underline;}
 .btn-cancelar:hover{color:var(--c1);}
 
+.moeda-toggle{display:flex;justify-content:center;gap:8px;margin-bottom:1.5rem;}
+.moeda-toggle button{background:var(--white);border:1.5px solid var(--c4);padding:6px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--textm);transition:all .15s;}
+.moeda-toggle button.ativo{background:var(--text);color:#fff;border-color:var(--text);}
+
 .loading{opacity:.6;pointer-events:none;}
 
 @media(max-width:640px){.planos-grid{grid-template-columns:1fr;}.hero{padding:2rem 1.5rem 1rem;}.planos-grid{padding:0 1.5rem;}}
@@ -81,10 +85,15 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
 
 <div class="hero">
   <h1>Planos simples e transparentes</h1>
-  <p>Comece grátis. Faça upgrade quando seu time crescer.</p>
+  <p>Comece grátis. Faça upgrade quando precisar de mais recursos.</p>
 </div>
 
 <div id="status-banner" class="status-banner"></div>
+
+<div class="moeda-toggle">
+  <button id="btn-brl" class="ativo" onclick="setMoeda('BRL')">🇧🇷 BRL</button>
+  <button id="btn-usd" onclick="setMoeda('USD')">🇺🇸 USD</button>
+</div>
 
 <div class="planos-grid">
 
@@ -94,11 +103,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
     <div class="plano-free-txt">Grátis</div>
     <div class="plano-preco-sub">para sempre</div>
     <ul class="plano-features">
-      <li>Até 3 salas ativas</li>
-      <li>Até 5 participantes por sala</li>
+      <li>Salas ilimitadas</li>
+      <li>Até 10 participantes por sala</li>
       <li>Até 20 tarefas por sala</li>
       <li>Histórico da sessão</li>
-      <li class="nao">Histórico permanente</li>
+      <li class="nao">Upload de planilha XLSX</li>
+      <li class="nao">Download dos resultados</li>
       <li class="nao">Suporte prioritário</li>
     </ul>
     <button class="btn-plano secundario" id="btn-free" onclick="usarFree()">Usar grátis</button>
@@ -108,13 +118,19 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
   <!-- PRO -->
   <div class="plano-card destaque" id="card-pro">
     <div class="plano-nome">Pro</div>
+<<<<<<< HEAD
     <div class="plano-preco">R$ 9<span>,90/mês</span></div>
+=======
+    <div class="plano-preco" id="preco-pro">R$ 19<span>,90/mês</span></div>
+>>>>>>> 1643b00 (feat: migra pagamento para Stripe com suporte BRL/USD)
     <div class="plano-preco-sub">cobrado mensalmente · cancele quando quiser</div>
     <ul class="plano-features">
       <li>Salas ilimitadas</li>
-      <li>Participantes ilimitados</li>
-      <li>Tarefas ilimitadas</li>
-      <li>Histórico permanente</li>
+      <li>Até 30 participantes por sala</li>
+      <li>Até 40 tarefas por sala</li>
+      <li>Upload de planilha XLSX</li>
+      <li>Download dos resultados XLSX</li>
+      <li>Sem anúncios</li>
       <li>Suporte prioritário</li>
     </ul>
     <button class="btn-plano primario" id="btn-pro" onclick="assinarPro()">Assinar Pro →</button>
@@ -139,7 +155,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
   </div>
   <div class="faq-item">
     <h3>O que acontece com minhas salas se eu cancelar?</h3>
-    <p>Suas salas e histórico são mantidos. Apenas novas salas ficam limitadas ao plano Free.</p>
+    <p>Suas salas e histórico são mantidos. As funcionalidades de upload e download ficam indisponíveis, e os anúncios voltam a aparecer.</p>
   </div>
   <div class="faq-item">
     <h3>Preciso de cartão de crédito para o Free?</h3>
@@ -150,6 +166,20 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
 <script>
 function getToken()   { return localStorage.getItem('pontua_token'); }
 function getUsuario() { try { return JSON.parse(localStorage.getItem('pontua_usuario')); } catch { return null; } }
+
+let moedaSelecionada = 'BRL';
+
+function setMoeda(m) {
+  moedaSelecionada = m;
+  document.getElementById('btn-brl').classList.toggle('ativo', m === 'BRL');
+  document.getElementById('btn-usd').classList.toggle('ativo', m === 'USD');
+  const el = document.getElementById('preco-pro');
+  if (m === 'USD') {
+    el.innerHTML = 'US$ 5<span>,90/mo</span>';
+  } else {
+    el.innerHTML = 'R$ 19<span>,90/mês</span>';
+  }
+}
 
 async function carregarStatus() {
   const token = getToken();
@@ -194,6 +224,7 @@ async function assinarPro() {
     const res  = await fetch('/api/pagamento/assinar', {
       method:  'POST',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ moeda: moedaSelecionada }),
     });
     const data = await res.json();
 

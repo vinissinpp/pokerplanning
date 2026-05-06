@@ -7,7 +7,6 @@
 const express  = require('express');
 const router   = express.Router();
 const { optionalAuth, requireAuth } = require('../middleware/auth');
-const { verificarLimiteSalas }      = require('../middleware/plano');
 const { validarCriarSala, checarValidacao } = require('../middleware/seguranca');
 const { criar, buscar, metricas, ping }     = require('../controllers/salaController');
 
@@ -15,7 +14,7 @@ const { criar, buscar, metricas, ping }     = require('../controllers/salaContro
 router.get('/ping', ping);
 router.get('/:id',  buscar);
 
-// Protegida — exige login + verifica limite de plano
-router.post('/', requireAuth, verificarLimiteSalas, validarCriarSala, checarValidacao, criar);
+// Protegida — exige login (salas são ilimitadas para todos os planos)
+router.post('/', requireAuth, validarCriarSala, checarValidacao, criar);
 
 module.exports = router;

@@ -1,40 +1,51 @@
 /**
  * config/planos.js
- * Definição dos planos Free e Pro com limites
+ * Diferenciação por funcionalidades, não por número de salas.
+ * Free: salas ilimitadas, limites de participantes/tarefas, sem upload/download
+ * Pro:  salas ilimitadas, limites maiores, upload + download + sem anúncios
  */
 
 const PLANOS = {
   free: {
-    nome:          'Free',
-    preco:         0,
+    nome:  'Free',
+    preco: 0,
     limites: {
-      salas:       3,    // máx salas ativas simultâneas
-      tarefas:     20,   // máx tarefas por sala
-      participantes: 5,  // máx participantes por sala
-      historico:   true, // histórico disponível (limitado)
+      participantes: 10,
+      tarefas:       20,
+    },
+    funcionalidades: {
+      upload:   false,
+      download: false,
+      ads:      true,
     },
     descricao: [
-      'Até 3 salas ativas',
-      'Até 5 participantes por sala',
+      'Salas ilimitadas',
+      'Até 10 participantes por sala',
       'Até 20 tarefas por sala',
       'Histórico da sessão',
     ],
   },
   pro: {
     nome:          'Pro',
-    preco:         990, // em centavos = R$ 9,90
-    precoExibicao: 9.90,
+    preco:         1990, // em centavos = R$ 19,90
+    precoExibicao: 19.90,
+    precoUSD:      5.90,
     limites: {
-      salas:         999,
-      tarefas:       999,
-      participantes: 999,
-      historico:     true,
+      participantes: 30,
+      tarefas:       40,
+    },
+    funcionalidades: {
+      upload:   true,
+      download: true,
+      ads:      false,
     },
     descricao: [
       'Salas ilimitadas',
-      'Participantes ilimitados',
-      'Tarefas ilimitadas',
-      'Histórico permanente',
+      'Até 30 participantes por sala',
+      'Até 40 tarefas por sala',
+      'Upload de planilhas XLSX',
+      'Download dos resultados XLSX',
+      'Sem anúncios',
       'Suporte prioritário',
     ],
   },

@@ -1,26 +1,19 @@
 /**
  * controllers/pagamentoController.js
- * Integração com Mercado Pago — Checkout Pro
+ * Integração com Stripe — Checkout + Subscriptions
  */
 
+const Stripe  = require('stripe');
 const supabase = require('../config/db');
 const PLANOS   = require('../config/planos');
 
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const APP_URL         = process.env.APP_URL || 'http://localhost:3000';
+const stripe  = new Stripe(process.env.STRIPE_SECRET_KEY);
+const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 
-async function mpFetch(endpoint, method = 'GET', body = null) {
-  const res = await fetch(`https://api.mercadopago.com${endpoint}`, {
-    method,
-    headers: {
-      'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
-      'Content-Type':  'application/json',
-      'X-Idempotency-Key': `pontua-${Date.now()}-${Math.random()}`,
-    },
-    body: body ? JSON.stringify(body) : null,
-  });
-  return res.json();
-}
+const PRICE_IDS = {
+  BRL: process.env.STRIPE_PRICE_BRL,
+  USD: process.env.STRIPE_PRICE_USD,
+};
 
 function listarPlanos(req, res) {
   res.json({
@@ -33,6 +26,7 @@ function listarPlanos(req, res) {
     pro: {
       nome:      PLANOS.pro.nome,
       preco:     PLANOS.pro.precoExibicao,
+      precoUSD:  PLANOS.pro.precoUSD,
       descricao: PLANOS.pro.descricao,
       limites:   PLANOS.pro.limites,
     },
@@ -42,105 +36,141 @@ function listarPlanos(req, res) {
 async function assinar(req, res) {
   try {
     const usuario = req.usuario;
+    const moeda   = req.body.moeda === 'USD' ? 'USD' : 'BRL';
+    const priceId = PRICE_IDS[moeda];
 
-    // Verifica se já tem assinatura ativa
-    const { data: assinaturaExistente } = await supabase
+    if (!priceId) {
+      return res.status(500).json({ erro: 'Plano não configurado para esta moeda.' });
+    }
+
+    const { data: existente } = await supabase
       .from('assinaturas')
-      .select('id, status')
+      .select('id')
       .eq('usuario_id', usuario.id)
       .eq('status', 'approved')
       .single();
 
-    if (assinaturaExistente) {
+    if (existente) {
       return res.status(409).json({ erro: 'Você já tem uma assinatura Pro ativa.' });
     }
 
-    // Cria preferência no Mercado Pago (Checkout Pro)
-    const preferencia = await mpFetch('/checkout/preferences', 'POST', {
-      items: [{
-        title:      'Pontua Planning Pro — Mensal',
-        quantity:   1,
-        currency_id: 'BRL',
-        unit_price: PLANOS.pro.precoExibicao,
-      }],
-      payer: {
-        email: usuario.email,
-      },
-      back_urls: {
-        success: `${APP_URL}/planos?status=sucesso`,
-        failure: `${APP_URL}/planos?status=erro`,
-        pending: `${APP_URL}/planos?status=pendente`,
-      },
-      auto_return:      'approved',
-      notification_url: `${APP_URL}/api/pagamento/webhook`,
-      metadata: {
-        usuario_id: usuario.id,
-        plano:      'pro',
-      },
+    const session = await stripe.checkout.sessions.create({
+      mode:           'subscription',
+      line_items:     [{ price: priceId, quantity: 1 }],
+      customer_email: usuario.email,
+      metadata:       { usuario_id: usuario.id, moeda },
+      subscription_data: { metadata: { usuario_id: usuario.id } },
+      success_url: `${APP_URL}/planos?status=sucesso`,
+      cancel_url:  `${APP_URL}/planos`,
+      locale:      moeda === 'USD' ? 'en' : 'pt-BR',
     });
 
-    if (!preferencia.id || !preferencia.init_point) {
-      console.error('[pagamento:assinar] Erro MP:', preferencia);
-      return res.status(500).json({ erro: 'Erro ao criar preferência. Tente novamente.' });
-    }
-
-    // Salva preferência pendente no banco
     await supabase.from('assinaturas').insert({
-      usuario_id:         usuario.id,
-      mp_subscription_id: preferencia.id,
-      plano:              'pro',
-      status:             'pending',
-      valor_mensal:       PLANOS.pro.precoExibicao,
+      usuario_id:              usuario.id,
+      stripe_subscription_id:  session.id, // atualizado para o subscription ID real no webhook
+      plano:                   'pro',
+      status:                  'pending',
+      moeda,
+      valor_mensal: moeda === 'BRL' ? PLANOS.pro.precoExibicao : PLANOS.pro.precoUSD,
     });
 
-    return res.json({
-      url_pagamento: preferencia.init_point,
-      preferencia_id: preferencia.id,
-    });
+    return res.json({ url_pagamento: session.url });
   } catch (err) {
     console.error('[pagamento:assinar]', err);
-    return res.status(500).json({ erro: 'Erro interno. Tente novamente.' });
+    return res.status(500).json({ erro: 'Erro ao criar checkout. Tente novamente.' });
   }
 }
 
 async function webhook(req, res) {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
   try {
-    const { type, data } = req.body;
-    res.sendStatus(200);
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
+  } catch (err) {
+    console.error('[webhook] Assinatura inválida:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
 
-    if (type !== 'payment') return;
+  res.sendStatus(200);
 
-    const paymentId = data?.id;
-    if (!paymentId) return;
+  try {
+    const obj = event.data.object;
 
-    // Busca detalhes do pagamento no MP
-    const pagamento = await mpFetch(`/v1/payments/${paymentId}`);
-    if (!pagamento?.id) return;
+    switch (event.type) {
 
-    const status      = pagamento.status;
-    const usuarioId   = pagamento.metadata?.usuario_id;
-    const preferenceId = pagamento.preference_id;
+      case 'checkout.session.completed': {
+        const usuarioId      = obj.metadata?.usuario_id;
+        const subscriptionId = obj.subscription;
+        const customerId     = obj.customer;
+        if (!usuarioId || !subscriptionId) break;
 
-    if (!usuarioId) return;
+        await supabase.from('assinaturas')
+          .update({
+            stripe_subscription_id: subscriptionId,
+            stripe_customer_id:     customerId,
+            status:                 'approved',
+            atualizada_em:          new Date().toISOString(),
+          })
+          .eq('usuario_id', usuarioId)
+          .eq('status', 'pending');
 
-    if (status === 'approved') {
-      // Atualiza assinatura no banco
-      await supabase.from('assinaturas')
-        .update({
-          status:        'approved',
-          atualizada_em: new Date().toISOString(),
-        })
-        .eq('mp_subscription_id', preferenceId);
+        await supabase.from('usuarios')
+          .update({ plano: 'pro' })
+          .eq('id', usuarioId);
 
-      // Atualiza plano do usuário
-      await supabase.from('usuarios')
-        .update({ plano: 'pro' })
-        .eq('id', usuarioId);
+        console.log(`[webhook] checkout.session.completed → usuário ${usuarioId} → Pro`);
+        break;
+      }
 
-      console.log(`[webhook] Pagamento ${paymentId} aprovado → usuário ${usuarioId} → Pro`);
+      case 'invoice.payment_succeeded': {
+        console.log(`[webhook] Renovação paga → subscription ${obj.subscription}`);
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const { data: ass } = await supabase
+          .from('assinaturas')
+          .select('usuario_id')
+          .eq('stripe_subscription_id', obj.subscription)
+          .single();
+
+        if (ass?.usuario_id) {
+          await supabase.from('usuarios')
+            .update({ plano: 'free' })
+            .eq('id', ass.usuario_id);
+          console.log(`[webhook] Pagamento falhou → usuário ${ass.usuario_id} → Free`);
+        }
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const { data: ass } = await supabase
+          .from('assinaturas')
+          .select('usuario_id')
+          .eq('stripe_subscription_id', obj.id)
+          .single();
+
+        if (ass?.usuario_id) {
+          await supabase.from('assinaturas')
+            .update({ status: 'cancelled', cancelada_em: new Date().toISOString(), atualizada_em: new Date().toISOString() })
+            .eq('stripe_subscription_id', obj.id);
+
+          await supabase.from('usuarios')
+            .update({ plano: 'free' })
+            .eq('id', ass.usuario_id);
+
+          console.log(`[webhook] Assinatura encerrada → usuário ${ass.usuario_id} → Free`);
+        }
+        break;
+      }
     }
   } catch (err) {
-    console.error('[pagamento:webhook]', err);
+    console.error('[webhook]', err);
   }
 }
 
@@ -148,14 +178,22 @@ async function cancelar(req, res) {
   try {
     const usuario = req.usuario;
 
-    await supabase.from('assinaturas')
-      .update({
-        status:        'cancelled',
-        cancelada_em:  new Date().toISOString(),
-        atualizada_em: new Date().toISOString(),
-      })
+    const { data: ass } = await supabase
+      .from('assinaturas')
+      .select('stripe_subscription_id')
       .eq('usuario_id', usuario.id)
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      .single();
+
+    if (!ass?.stripe_subscription_id) {
+      return res.status(404).json({ erro: 'Nenhuma assinatura ativa encontrada.' });
+    }
+
+    await stripe.subscriptions.cancel(ass.stripe_subscription_id);
+
+    await supabase.from('assinaturas')
+      .update({ status: 'cancelled', cancelada_em: new Date().toISOString(), atualizada_em: new Date().toISOString() })
+      .eq('stripe_subscription_id', ass.stripe_subscription_id);
 
     await supabase.from('usuarios')
       .update({ plano: 'free' })
@@ -170,9 +208,9 @@ async function cancelar(req, res) {
 
 async function status(req, res) {
   try {
-    const { data: assinatura } = await supabase
+    const { data: ass } = await supabase
       .from('assinaturas')
-      .select('status, valor_mensal, criada_em')
+      .select('status, valor_mensal, criada_em, moeda')
       .eq('usuario_id', req.usuario.id)
       .order('criada_em', { ascending: false })
       .limit(1)
@@ -184,10 +222,7 @@ async function status(req, res) {
       .eq('id', req.usuario.id)
       .single();
 
-    return res.json({
-      plano:      usuario?.plano || 'free',
-      assinatura: assinatura || null,
-    });
+    return res.json({ plano: usuario?.plano || 'free', assinatura: ass || null });
   } catch (err) {
     return res.status(500).json({ erro: 'Erro interno.' });
   }

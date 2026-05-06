@@ -51,6 +51,10 @@ const io     = new Server(server, {
 // ─────────────────────────────────────────────
 app.use(helmetConfig);
 app.use(corsConfig);
+
+// Webhook Stripe precisa de raw body para verificar assinatura — ANTES do express.json()
+app.use('/api/pagamento/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(bloquearPayloadGrande);
@@ -124,6 +128,6 @@ server.listen(PORT, () => {
   console.log(`   → http://localhost:${PORT}`);
   console.log(`   → Ambiente:  ${process.env.NODE_ENV || 'development'}`);
   console.log(`   → Banco:     ${process.env.SUPABASE_URL ? 'Supabase ✓' : 'Memória'}`);
-  console.log(`   → Pagamento: ${process.env.MP_ACCESS_TOKEN ? 'Mercado Pago ✓' : 'não configurado'}`);
+  console.log(`   → Pagamento: ${process.env.STRIPE_SECRET_KEY ? 'Stripe ✓' : 'não configurado'}`);
   console.log(`   → Salas expiram após: ${process.env.HORAS_SALA_ATIVA || 24}h\n`);
 });

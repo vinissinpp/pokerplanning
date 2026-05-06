@@ -8,9 +8,9 @@
  *  - SEQUENCIAS importadas do middleware/plano.js
  */
 
-const { v4: uuidv4 }  = require('uuid');
-const supabase         = require('../config/db');
-const { SEQUENCIAS }   = require('../middleware/plano');
+const { v4: uuidv4 }        = require('uuid');
+const supabase               = require('../config/db');
+const { SEQUENCIAS, LIMITES } = require('../middleware/plano');
 
 function estadoPublico(sala) {
   return {
@@ -45,6 +45,14 @@ async function garantirSala(salas, salaId) {
 
   if (!sala) return false;
 
+  // Cache do plano do dono para verificar limites durante a sessão
+  let planoOwner = 'free';
+  if (sala.dono_id) {
+    const { data: dono } = await supabase
+      .from('usuarios').select('plano').eq('id', sala.dono_id).single();
+    planoOwner = dono?.plano || 'free';
+  }
+
   const { data: tarefas }   = await supabase.from('tarefas').select('*').eq('sala_id', salaId).order('ordem');
   const { data: historico } = await supabase.from('historico').select('*').eq('sala_id', salaId).order('votado_em');
 
@@ -54,6 +62,7 @@ async function garantirSala(salas, salaId) {
     donoId:       sala.dono_id,
     donoSocketId: null,
     sequencia:    sala.sequencia || 'fibonacci',
+    planoOwner,
     participantes: {},
     tarefas:      tarefas || [],
     tarefaAtiva:  tarefas?.find(t => t.pontos === null)?.id || null,
@@ -87,7 +96,7 @@ function registrar(io, salas) {
         salas[salaId] = {
           id: salaId, nome: `Sala ${salaId}`,
           donoId: usuarioId || null, donoSocketId: null,
-          sequencia: 'fibonacci',
+          sequencia: 'fibonacci', planoOwner: 'free',
           participantes: {}, tarefas: [], tarefaAtiva: null,
           votos: {}, revelado: false, historico: [],
         };
@@ -97,6 +106,14 @@ function registrar(io, salas) {
       }
 
       const sala = salas[salaId];
+
+      // Verifica limite de participantes do plano do dono
+      const limites = LIMITES[sala.planoOwner || 'free'];
+      if (Object.keys(sala.participantes).length >= limites.participantes) {
+        socket.emit('erro', { msg: `Sala cheia. Limite de ${limites.participantes} participantes (plano ${sala.planoOwner || 'free'}).` });
+        return;
+      }
+
       socket.join(salaId);
       socket.data = { salaId, nome: nome.trim(), usuarioId: usuarioId || null };
       sala.participantes[socket.id] = { id: socket.id, nome: nome.trim() };
@@ -176,6 +193,13 @@ function registrar(io, salas) {
       const { salaId } = socket.data || {};
       const sala = salas[salaId];
       if (!sala || !isAdmin(sala, socket.id) || !nome?.trim()) return;
+
+      // Verifica limite de tarefas do plano do dono
+      const limites = LIMITES[sala.planoOwner || 'free'];
+      if (sala.tarefas.length >= limites.tarefas) {
+        socket.emit('erroTarefa', { msg: `Limite de ${limites.tarefas} tarefas atingido. Faça upgrade para o plano Pro.` });
+        return;
+      }
 
       const tarefa = {
         id:          uuidv4().slice(0, 8),

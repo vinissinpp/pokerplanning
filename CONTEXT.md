@@ -9,7 +9,7 @@ SaaS de Planning Poker em tempo real para times ágeis. Permite criar salas, imp
 - **Banco:** Supabase (PostgreSQL)
 - **Auth:** JWT (jsonwebtoken) + bcryptjs
 - **Email:** Resend
-- **Pagamento:** Mercado Pago (Checkout Pro)
+- **Pagamento:** Stripe (Checkout + Subscriptions)
 - **Deploy:** Render (free tier)
 - **Domínio:** pontuaplanning.com (Hostinger)
 - **Frontend:** HTML/CSS/JS vanilla (sem framework)
@@ -35,17 +35,21 @@ server.js → routes/ → middleware/ → controllers/ → config/
 - Não usar o endereço `pokerplanning-sbmc.onrender.com` — domínio oficial é `pontuaplanning.com`
 - Não commitar `.env` — variáveis estão no Render Environment
 
+## Modelo de Planos
+- **Free:** salas ilimitadas, até 10 participantes/sala, até 20 tarefas/sala, sem upload/download, com anúncios
+- **Pro (R$19,90/mês · US$5,90/mês):** salas ilimitadas, até 30 participantes/sala, até 40 tarefas/sala, upload XLSX, download XLSX, sem anúncios
+
 ## Estado Atual
 - ✅ MVP funcional em produção
-- ✅ Pagamento Mercado Pago operacional
+- ✅ Pagamento Stripe com recorrência mensal operacional
 - ✅ Domínio próprio configurado
+- ✅ Bloqueio de upload/download por plano implementado
+- ✅ Limites de participantes/tarefas por plano no WebSocket
+- ✅ Toggle BRL/USD na página de planos
 - ⚠️ CORS ainda bloqueia `www.pontuaplanning.com` (bug pendente)
 - ⚠️ AdSense aguardando aprovação Google
-- ⏳ Bloqueio de features por plano (upload/exportar) não implementado
 
 ## Próximos Passos
 1. Corrigir CORS para `www.pontuaplanning.com`
-2. Bloquear upload CSV/XLS para Free
-3. Bloquear exportar para Free
-4. Voltar rate limit auth para `max: 10`
-5. Configurar email Zoho para suporte
+2. Voltar rate limit auth para `max: 10`
+3. Configurar email Zoho para suporte

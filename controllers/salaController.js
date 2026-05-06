@@ -7,9 +7,8 @@
  *  - buscar() é pública (visitantes precisam verificar sala)
  */
 
-const { v4: uuidv4 }              = require('uuid');
-const supabase                    = require('../config/db');
-const { incrementarSalasCriadas } = require('../middleware/plano');
+const { v4: uuidv4 } = require('uuid');
+const supabase       = require('../config/db');
 
 let _salas = null;
 function init(salasRef) { _salas = salasRef; }
@@ -55,11 +54,6 @@ async function criar(req, res) {
       participantes: {}, tarefas: [], tarefaAtiva: null,
       votos: {}, revelado: false, historico: [],
     };
-
-    // Incrementa contador permanente (só se usuário logado)
-    if (donoId) {
-      await incrementarSalasCriadas(donoId);
-    }
 
     // Retorna { id, nome } — compatível com o front atual
     // O front faz: if (data.id) window.location.href = `/sala/${data.id}?nome=...`

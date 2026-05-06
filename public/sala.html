@@ -344,6 +344,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
           <div class="sec-label" style="margin:0">Tarefas</div>
           <div class="sb-acoes" id="sb-acoes-admin">
             <button class="btn-sm" style="font-size:11px;padding:4px 9px;" onclick="abrirModalTarefa()">+ Novo</button>
+            <button class="btn-upload" id="btn-exportar" onclick="exportarXLSX()" style="display:none">⬇ Exportar</button>
             <button class="btn-upload" onclick="abrirModalUpload()">📋 Importar</button>
           </div>
         </div>
@@ -447,6 +448,7 @@ let socket, meuNome, minhaSalaId, meuId;
 let estado=null, votei=null, tarefasImport=[], metricasExpanded=true;
 let souAdmin = false;
 let sequenciaAtual = 'fibonacci';
+let meuPlano = 'free';
 
 function getToken()   { return localStorage.getItem(TOKEN_KEY); }
 function getUsuario() { try { return JSON.parse(localStorage.getItem(USUARIO_KEY)); } catch { return null; } }
@@ -493,7 +495,13 @@ async function renderNavSala() {
     const desc   = document.getElementById('plano-desc-sala');
     const upLink = document.getElementById('dropdown-upgrade-sala');
 
+<<<<<<< HEAD
     if (usuario.plano === 'pro') {
+=======
+    meuPlano = usuario.plano || 'free';
+
+    if (meuPlano === 'pro') {
+>>>>>>> 1643b00 (feat: migra pagamento para Stripe com suporte BRL/USD)
       badge.textContent = 'Pro'; badge.classList.add('pro');
       desc.textContent  = 'Plano profissional';
       upLink.style.display = 'none';
@@ -503,8 +511,17 @@ async function renderNavSala() {
       upLink.style.display = 'flex';
     }
 
+<<<<<<< HEAD
     // Mostra ads só para Free
     if (usuario.plano !== 'pro') {
+=======
+    // Botão exportar visível apenas para admin Pro
+    const btnExp = document.getElementById('btn-exportar');
+    if (btnExp) btnExp.style.display = (souAdmin && meuPlano === 'pro') ? 'inline-flex' : 'none';
+
+    // Mostra ads só para Free
+    if (meuPlano !== 'pro') {
+>>>>>>> 1643b00 (feat: migra pagamento para Stripe com suporte BRL/USD)
       const container = document.getElementById('ads-container-sala');
       container.style.display = 'block';
       setTimeout(() => {
@@ -609,7 +626,8 @@ function conectar() {
   });
 
   socket.on('disconnect', () => toast('Conexão perdida. Reconectando...'));
-  socket.on('erroVoto', ({ msg }) => toast(msg, true));
+  socket.on('erroVoto',   ({ msg }) => toast(msg, true));
+  socket.on('erroTarefa', ({ msg }) => toast(msg, true));
 }
 
 function renderSala() {
@@ -810,8 +828,29 @@ function setupUpload() {
   ua.addEventListener('dragleave',()=>ua.classList.remove('drag'));
   ua.addEventListener('drop',e=>{e.preventDefault();ua.classList.remove('drag');if(e.dataTransfer.files[0])processarArquivo(e.dataTransfer.files[0]);});
 }
+function exportarXLSX() {
+  if (!souAdmin || meuPlano !== 'pro') return;
+  if (!estado?.tarefas?.length) { toast('Nenhuma tarefa para exportar.', true); return; }
+  const dados = estado.tarefas.map(t => ({
+    Nome:        t.nome,
+    Descricao:   t.descricao   || '',
+    Responsavel: t.responsavel || '',
+    Pontos:      t.pontos !== null ? t.pontos : '',
+  }));
+  const ws = XLSX.utils.json_to_sheet(dados);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tarefas');
+  const nomeSala = (estado.nome || 'sala').replace(/[^a-zA-Z0-9\s]/g, '').trim();
+  XLSX.writeFile(wb, `pontua-${nomeSala}.xlsx`);
+  toast('Planilha exportada com sucesso!');
+}
+
 function abrirModalUpload() {
   if (!souAdmin) return;
+  if (meuPlano !== 'pro') {
+    toast('Upload de planilha disponível apenas no plano Pro. Acesse /planos para fazer upgrade!', true);
+    return;
+  }
   fecharModals(); tarefasImport=[];
   document.getElementById('preview-box').classList.remove('visivel');
   document.getElementById('preview-lista').innerHTML='';
