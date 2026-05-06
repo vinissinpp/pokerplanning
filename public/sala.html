@@ -495,13 +495,9 @@ async function renderNavSala() {
     const desc   = document.getElementById('plano-desc-sala');
     const upLink = document.getElementById('dropdown-upgrade-sala');
 
-<<<<<<< HEAD
-    if (usuario.plano === 'pro') {
-=======
     meuPlano = usuario.plano || 'free';
 
     if (meuPlano === 'pro') {
->>>>>>> 1643b00 (feat: migra pagamento para Stripe com suporte BRL/USD)
       badge.textContent = 'Pro'; badge.classList.add('pro');
       desc.textContent  = 'Plano profissional';
       upLink.style.display = 'none';
@@ -511,17 +507,12 @@ async function renderNavSala() {
       upLink.style.display = 'flex';
     }
 
-<<<<<<< HEAD
-    // Mostra ads só para Free
-    if (usuario.plano !== 'pro') {
-=======
     // Botão exportar visível apenas para admin Pro
     const btnExp = document.getElementById('btn-exportar');
     if (btnExp) btnExp.style.display = (souAdmin && meuPlano === 'pro') ? 'inline-flex' : 'none';
 
     // Mostra ads só para Free
     if (meuPlano !== 'pro') {
->>>>>>> 1643b00 (feat: migra pagamento para Stripe com suporte BRL/USD)
       const container = document.getElementById('ads-container-sala');
       container.style.display = 'block';
       setTimeout(() => {

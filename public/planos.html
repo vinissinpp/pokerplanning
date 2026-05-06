@@ -67,9 +67,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
 .btn-cancelar{background:none;border:none;color:var(--textm);font-size:13px;cursor:pointer;text-decoration:underline;}
 .btn-cancelar:hover{color:var(--c1);}
 
-.moeda-toggle{display:flex;justify-content:center;gap:8px;margin-bottom:1.5rem;}
-.moeda-toggle button{background:var(--white);border:1.5px solid var(--c4);padding:6px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--textm);transition:all .15s;}
-.moeda-toggle button.ativo{background:var(--text);color:#fff;border-color:var(--text);}
 
 .loading{opacity:.6;pointer-events:none;}
 
@@ -89,11 +86,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
 </div>
 
 <div id="status-banner" class="status-banner"></div>
-
-<div class="moeda-toggle">
-  <button id="btn-brl" class="ativo" onclick="setMoeda('BRL')">🇧🇷 BRL</button>
-  <button id="btn-usd" onclick="setMoeda('USD')">🇺🇸 USD</button>
-</div>
 
 <div class="planos-grid">
 
@@ -118,11 +110,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
   <!-- PRO -->
   <div class="plano-card destaque" id="card-pro">
     <div class="plano-nome">Pro</div>
-<<<<<<< HEAD
-    <div class="plano-preco">R$ 9<span>,90/mês</span></div>
-=======
     <div class="plano-preco" id="preco-pro">R$ 19<span>,90/mês</span></div>
->>>>>>> 1643b00 (feat: migra pagamento para Stripe com suporte BRL/USD)
     <div class="plano-preco-sub">cobrado mensalmente · cancele quando quiser</div>
     <ul class="plano-features">
       <li>Salas ilimitadas</li>
@@ -169,15 +157,17 @@ function getUsuario() { try { return JSON.parse(localStorage.getItem('pontua_usu
 
 let moedaSelecionada = 'BRL';
 
-function setMoeda(m) {
-  moedaSelecionada = m;
-  document.getElementById('btn-brl').classList.toggle('ativo', m === 'BRL');
-  document.getElementById('btn-usd').classList.toggle('ativo', m === 'USD');
-  const el = document.getElementById('preco-pro');
-  if (m === 'USD') {
-    el.innerHTML = 'US$ 5<span>,90/mo</span>';
-  } else {
-    el.innerHTML = 'R$ 19<span>,90/mês</span>';
+async function detectarMoeda() {
+  try {
+    const res  = await fetch('https://ipinfo.io/json');
+    const data = await res.json();
+    moedaSelecionada = data.country === 'BR' ? 'BRL' : 'USD';
+  } catch {
+    moedaSelecionada = 'BRL'; // fallback seguro
+  }
+  if (moedaSelecionada === 'USD') {
+    const el = document.getElementById('preco-pro');
+    if (el) el.innerHTML = 'US$ 5<span>,90/mo</span>';
   }
 }
 
@@ -276,12 +266,13 @@ function mostrarBanner(msg, tipo) {
   el.className    = `status-banner ${tipo}`;
 }
 
-// Checa status na URL (retorno do MP)
+// Checa status na URL (retorno do Stripe)
 const params = new URLSearchParams(location.search);
 if (params.get('status') === 'sucesso') {
-  mostrarBanner('🎉 Pagamento confirmado! Seu plano Pro está ativo.', 'sucesso');
+  mostrarBanner('Pagamento confirmado! Seu plano Pro está ativo.', 'sucesso');
 }
 
+detectarMoeda();
 carregarStatus();
 </script>
 </body>
