@@ -10,7 +10,7 @@ const {
   listarPlanos, assinar, cancelar, status, webhook,
 } = require('../controllers/pagamentoController');
 
-// Webhook — sem auth (chamado pelo Mercado Pago)
+// Webhook — sem auth (chamado pelo Stripe)
 router.post('/webhook', webhook);
 
 // Planos públicos

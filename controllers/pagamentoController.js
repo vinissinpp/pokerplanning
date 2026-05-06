@@ -55,11 +55,12 @@ async function assinar(req, res) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode:           'subscription',
-      line_items:     [{ price: priceId, quantity: 1 }],
-      customer_email: usuario.email,
-      metadata:       { usuario_id: usuario.id, moeda },
-      subscription_data: { metadata: { usuario_id: usuario.id } },
+      mode:                 'subscription',
+      payment_method_types: ['card'],
+      line_items:           [{ price: priceId, quantity: 1 }],
+      customer_email:       usuario.email,
+      metadata:             { usuario_id: usuario.id, moeda },
+      subscription_data:    { metadata: { usuario_id: usuario.id } },
       success_url: `${APP_URL}/planos?status=sucesso`,
       cancel_url:  `${APP_URL}/planos`,
       locale:      moeda === 'USD' ? 'en' : 'pt-BR',

@@ -61,6 +61,7 @@ const helmetConfig = helmet({
         'wss:',
         'ws:',
         process.env.SUPABASE_URL,
+        'https://ipinfo.io',
         'https://*.googlesyndication.com',
         'https://*.doubleclick.net',
         'https://*.google.com',
