@@ -256,6 +256,21 @@ function registrar(io, salas) {
       }
       emit(io, salas, salaId);
     });
+    socket.on('excluirTarefa', async ({ tarefaId }) => {
+  const { salaId } = socket.data || {};
+  const sala = salas[salaId];
+  if (!sala || !isAdmin(sala, socket.id)) return;
+
+  sala.tarefas = sala.tarefas.filter(t => t.id !== tarefaId);
+  if (sala.tarefaAtiva === tarefaId) {
+    sala.tarefaAtiva = sala.tarefas.find(t => t.pontos === null)?.id || null;
+    sala.revelado = false;
+    Object.keys(sala.participantes).forEach(id => { sala.votos[id] = null; });
+  }
+
+  await supabase.from('tarefas').delete().eq('id', tarefaId);
+  emit(io, salas, salaId);
+});
 
     socket.on('salvarResultado', async ({ tarefaId, pontos }) => {
       const { salaId } = socket.data || {};

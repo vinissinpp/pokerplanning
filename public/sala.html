@@ -95,8 +95,8 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .tarefa-resp{ font-size:11px; color:var(--texts); margin-top:4px; }
 .tarefa-vazia{ font-size:13px; color:var(--texts); font-style:italic; }
 .votos-area{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-.voto-item{ display:flex; flex-direction:column; align-items:center; gap:4px; }
-.voto-nome{ font-size:9px; color:var(--texts); text-align:center; max-width:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.voto-item{ display:flex; flex-direction:column; align-items:center; gap:4px; width:52px; }
+.voto-nome{ font-size:9px; color:var(--texts); text-align:center; width:52px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .av{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
 .carta-v{ width:32px; height:44px; border-radius:6px; border:1px solid var(--c4); background:var(--c5); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; }
 .carta-oculta{ background:var(--c1); border-color:var(--c1d); color:#fff; }
@@ -593,6 +593,7 @@ function conectar() {
 
   socket.on('estado', s => {
     estado = s;
+    if (!s.revelado) votei = null;
     sequenciaAtual = s.sequencia || 'fibonacci';
     if (document.getElementById('tela-login').classList.contains('ativa')) {
       document.getElementById('tela-login').classList.remove('ativa');
@@ -696,6 +697,7 @@ function renderSala() {
       <div class="dot${t.pontos!==null?' ok':(t.id===tarefaAtiva?' cur':'')}"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.nome)}</span>
       <span class="tarefa-pt${t.pontos===null?' pend':''}">${t.pontos!==null?t.pontos+' pts':'—'}</span>
+${souAdmin ? `<button class="btn-icon" style="font-size:11px;color:#ccc;" onclick="event.stopPropagation();excluirTarefa('${t.id}')" title="Excluir">✕</button>` : ''}
     </div>`).join('');
 }
 
@@ -879,6 +881,11 @@ function importarTarefas() {
   tarefasImport.forEach(t=>socket.emit('adicionarTarefa',t));
   toast(`${tarefasImport.length} tarefas importadas!`);
   fecharModals();
+}
+function excluirTarefa(tarefaId) {
+  if (!souAdmin) return;
+  if (!confirm('Excluir esta tarefa?')) return;
+  socket.emit('excluirTarefa', { tarefaId });
 }
 
 function fecharModals(){ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('ativo')); }
