@@ -593,7 +593,7 @@ function conectar() {
 
   socket.on('estado', s => {
     estado = s;
-    if (!s.revelado) votei = null;
+    if (!s.revelado && s.tarefaAtiva !== estado?.tarefaAtiva) votei = null;
     sequenciaAtual = s.sequencia || 'fibonacci';
     if (document.getElementById('tela-login').classList.contains('ativa')) {
       document.getElementById('tela-login').classList.remove('ativa');
