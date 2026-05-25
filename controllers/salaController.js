@@ -1,10 +1,6 @@
 /**
- * controllers/salaController.js — v2.0
- * Correções:
- *  - criar() retorna { id, nome } direto (sem wrapper) — compatível com o front atual
- *  - incrementa salas_criadas após criar com sucesso
- *  - adiciona rota ping (anti cold-start)
- *  - buscar() é pública (visitantes precisam verificar sala)
+ * controllers/salaController.js — v2.1
+ * Fix: busca planoOwner do banco ao criar sala em memória
  */
 
 const { v4: uuidv4 } = require('uuid');
@@ -47,16 +43,23 @@ async function criar(req, res) {
 
     if (error) throw error;
 
-    // Inicializa sala em memória
+    // Busca plano do dono para aplicar limites corretos desde o início
+    let planoOwner = 'free';
+    if (donoId) {
+      const { data: dono } = await supabase
+        .from('usuarios').select('plano').eq('id', donoId).single();
+      planoOwner = dono?.plano || 'free';
+    }
+
+    // Inicializa sala em memória com planoOwner correto
     _salas[id] = {
       id, nome: nomeSala,
       donoId, donoSocketId: null,
+      planoOwner,
       participantes: {}, tarefas: [], tarefaAtiva: null,
       votos: {}, revelado: false, historico: [],
     };
 
-    // Retorna { id, nome } — compatível com o front atual
-    // O front faz: if (data.id) window.location.href = `/sala/${data.id}?nome=...`
     return res.status(201).json({ id, nome: nomeSala });
   } catch (err) {
     console.error('[sala:criar]', err);
@@ -64,7 +67,7 @@ async function criar(req, res) {
   }
 }
 
-// GET /api/sala/:id — buscar sala (PÚBLICA — visitante precisa verificar)
+// GET /api/sala/:id — buscar sala (PÚBLICA)
 async function buscar(req, res) {
   try {
     const { data: sala } = await supabase
@@ -107,7 +110,7 @@ async function metricas(req, res) {
   }
 }
 
-// GET /api/sala/ping — mantém o Render acordado (UptimeRobot chama a cada 5min)
+// GET /api/sala/ping — mantém o Render acordado
 function ping(req, res) {
   res.json({ ok: true, ts: Date.now() });
 }
