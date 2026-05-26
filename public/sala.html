@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Pontua — Sala</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Goldman:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -110,7 +110,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 
 .media-box{ display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--c4); }
 .media-box.visivel{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-.media-num{ font-family:'Syne',sans-serif; font-size:34px; font-weight:800; color:var(--c1); }
+.media-num{ font-family:'Goldman',serif; font-size:34px; font-weight:800; color:var(--c1); }
 .media-label{ font-size:10px; color:var(--texts); margin-bottom:2px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
 .sp-row{ display:flex; gap:6px; align-items:center; }
 .sp-row select{ padding:7px 10px; border:1.5px solid var(--c4); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:13px; background:var(--c5); }
@@ -121,7 +121,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .carta-btn:hover:not(:disabled){ border-color:var(--c1); transform:translateY(-11px) scale(1.05); box-shadow:0 12px 28px rgba(255,66,66,.18); z-index:2; }
 .carta-btn.ativa{ border:2px solid var(--c1); background:var(--c2); transform:translateY(-15px) scale(1.07); box-shadow:0 16px 34px rgba(255,66,66,.22); z-index:3; }
 .carta-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none !important; box-shadow:none; }
-.carta-valor{ font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--text); line-height:1; position:relative; z-index:1; }
+.carta-valor{ font-family:'Goldman',serif; font-size:22px; font-weight:800; color:var(--text); line-height:1; position:relative; z-index:1; }
 .carta-btn.ativa .carta-valor,.carta-btn:hover:not(:disabled) .carta-valor{ color:var(--c1); }
 .carta-naipe{ position:absolute; width:11px; height:11px; opacity:.5; }
 .carta-naipe.tl{ top:6px; left:6px; }
@@ -142,7 +142,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 .metricas-resumo-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
 .mr-card{ background:var(--c5); border:1px solid var(--c4); border-radius:var(--radius-sm); padding:.9rem 1rem; text-align:center; }
 .mr-label{ font-size:10px; color:var(--texts); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; font-weight:600; }
-.mr-valor{ font-family:'Syne',sans-serif; font-size:26px; font-weight:800; }
+.mr-valor{ font-family:'Goldman',serif; font-size:26px; font-weight:800; }
 .mr-valor.destaque{ color:var(--c1); }
 .mr-sub{ font-size:11px; color:var(--textm); margin-top:2px; }
 .colab-lista{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
