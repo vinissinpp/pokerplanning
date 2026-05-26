@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Pontua — Sala</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Goldman:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -314,7 +315,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
       <div class="card">
         <div class="metricas-section">
           <div class="metricas-header" onclick="toggleMetricas()">
-            <h3>📊 Métricas da Sprint <span class="sec-badge" id="met-badge">0</span></h3>
+            <h3><i class="ti ti-chart-bar" aria-hidden="true"></i> Métricas da Sprint <span class="sec-badge" id="met-badge">0</span></h3>
             <button class="btn-toggle" id="btn-toggle-met">▾ Recolher</button>
           </div>
           <div class="metricas-body" id="metricas-body">
@@ -344,8 +345,8 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
           <div class="sec-label" style="margin:0">Tarefas</div>
           <div class="sb-acoes" id="sb-acoes-admin">
             <button class="btn-sm" style="font-size:11px;padding:4px 9px;" onclick="abrirModalTarefa()">+ Novo</button>
-            <button class="btn-upload" id="btn-exportar" onclick="exportarXLSX()" style="display:none">⬇ Exportar</button>
-            <button class="btn-upload" onclick="abrirModalUpload()">📋 Importar</button>
+            <button class="btn-upload" id="btn-exportar" onclick="exportarXLSX()" style="display:none"><i class="ti ti-download" aria-hidden="true"></i> Exportar</button>
+            <button class="btn-upload" onclick="abrirModalUpload()"><i class="ti ti-upload" aria-hidden="true"></i> Importar</button>
           </div>
         </div>
         <div id="lista-tarefas"><div style="font-size:12px;color:var(--texts);font-style:italic;">Nenhuma tarefa ainda.</div></div>
@@ -408,7 +409,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     <h3>Importar planilha</h3>
     <div class="modelo-hint"><span>💡</span><div>Colunas aceitas: <strong>nome</strong> (obrigatório), <strong>descricao</strong> e <strong>responsavel</strong> (opcionais). A ordem das colunas não importa.</div></div>
     <div class="upload-area" id="upload-area" onclick="document.getElementById('input-arquivo').click()">
-      <div style="font-size:28px;">📂</div>
+      <div style="font-size:28px;"><i class="ti ti-folder-open" aria-hidden="true"></i></div>
       <p>Clique para selecionar ou arraste o arquivo aqui</p>
       <span>CSV ou XLSX</span>
     </div>
