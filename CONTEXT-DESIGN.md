@@ -1,7 +1,7 @@
 # CONTEXT-DESIGN.md — Design System
 
 ## Visão Geral
-Design system próprio em CSS puro com variáveis CSS. Identidade verde-limão + vermelho coral. Tipografia Syne (títulos) + DM Sans (corpo).
+Design system próprio em CSS puro com variáveis CSS. Identidade verde-limão + vermelho coral. Tipografia Goldman (títulos/números) + Syne (logo) + DM Sans (corpo).
 
 ## Tokens (CSS Variables)
 ```css
@@ -20,10 +20,15 @@ Design system próprio em CSS puro com variáveis CSS. Identidade verde-limão +
 ```
 
 ## Tipografia
-- **Títulos/Logo:** Syne 800 (font-family:'Syne',sans-serif)
-- **Corpo/UI:** DM Sans 300/400/500
-- **Valores de cartas:** Syne 800
-- Ambas carregadas via Google Fonts
+- **Logo/Marca:** Syne 800 — usado EXCLUSIVAMENTE em .nav-logo, .modal-logo, .footer-logo, .logo
+- **Títulos/Números/Cartas:** Goldman 400/700 — h1, h2, .hero-title, .section-title, .feature-title, .step-title, .step-num, .stat-num, .carta-valor, .media-num, .mr-valor, .plano-preco, .plano-free-txt
+- **Corpo/UI:** DM Sans 300/400/500 — todo o resto
+- Todas carregadas via Google Fonts
+
+## Import Google Fonts
+```html
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Goldman:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+```
 
 ## Componentes Padrão
 - **Cards:** `background:white`, `border:1px solid var(--c4)`, `border-radius:var(--radius)`
@@ -39,11 +44,14 @@ Design system próprio em CSS puro com variáveis CSS. Identidade verde-limão +
 - Cartas: `cubic-bezier(.34,1.56,.64,1)` para efeito elástico no hover/ativa
 
 ## Padrões Visuais
-- Logo: `● Pontua planning` (dot vermelho + Syne bold + sub cinza)
+- Logo: `● Pontua planning` (dot vermelho + Syne bold + sub cinza) — SEMPRE Syne
+- Títulos e números: Goldman — impacto visual forte
 - Gradiente de importância: vermelho (ação) > verde-limão (positivo) > cinza (neutro)
 - Sem sombras pesadas — apenas `box-shadow` sutil nos cards e CTA
 
 ## O que NÃO fazer
+- Não usar Goldman na logo — logo usa Syne exclusivamente
+- Não usar Syne fora da logo — títulos usam Goldman
 - Não usar cores fora do sistema de variáveis
 - Não misturar `px` hardcoded para radius — usar `var(--radius)` ou `var(--radius-sm)`
-- Não usar outra fonte além de Syne e DM Sans
+- Não usar outra fonte além de Goldman, Syne e DM Sans
