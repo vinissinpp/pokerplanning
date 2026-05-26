@@ -257,7 +257,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
     <div class="nav-sala" id="nav-sala-nome">—</div>
     <div class="nav-dir">
       <span class="nav-badge" id="nav-badge">0 online</span>
-      <button class="btn-nav" id="btn-seq" onclick="abrirModalSequencia()" style="display:none">🃏 Sequência</button>
+      <button class="btn-nav" id="btn-seq" onclick="abrirModalSequencia()" style="display:none"><i class="ti ti-cards" aria-hidden="true"></i> Sequência</button>
       <div class="user-menu-wrap-sala">
         <button class="user-avatar-btn-sala" id="user-avatar-btn-sala" onclick="toggleDropdownSala()">
           <div class="nav-av-sm" id="nav-av-sm">?</div>
@@ -277,7 +277,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
           <button class="dropdown-item-sala sair-sala" onclick="sairDaConta()">→ Sair da conta</button>
         </div>
       </div>
-      <button class="btn-nav" onclick="copiarLink()">🔗 Copiar link</button>
+      <button class="btn-nav" onclick="copiarLink()"><i class="ti ti-link" aria-hidden="true"></i> Copiar link</button>
     </div>
   </nav>
 
@@ -392,7 +392,7 @@ nav{ display:flex; align-items:center; justify-content:space-between; padding:.8
 </div>
 <div class="overlay" id="modal-sequencia">
   <div class="modal" style="max-width:400px;">
-    <h3>🃏 Sequência de votação</h3>
+    <h3><i class="ti ti-cards" aria-hidden="true"></i> Sequência de votação</h3>
     <p class="modal-sub">Muda as cartas para todos na sala imediatamente.</p>
     <div class="seq-opcoes" id="seq-opcoes">
       <button class="seq-opcao" data-seq="fibonacci" onclick="trocarSequencia('fibonacci')"><strong>Fibonacci</strong><span>1, 2, 3, 5, 8, 13, 21, ?</span></button>
