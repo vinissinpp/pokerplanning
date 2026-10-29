@@ -10,7 +10,7 @@ const http       = require('http');
 const { Server } = require('socket.io');
 const path       = require('path');
 
-const { corsConfig, helmetConfig, sanitizarBody, bloquearPayloadGrande } = require('./middleware/seguranca');
+const { origensPermitidas, corsConfig, helmetConfig, sanitizarBody, bloquearPayloadGrande } = require('./middleware/seguranca');
 const { geral }          = require('./middleware/rateLimit');
 const { iniciarLimpeza } = require('./middleware/limpeza');
 
@@ -33,11 +33,8 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, {
   cors: {
-    origin: [
-      process.env.APP_URL,
-      process.env.CORS_ORIGIN,
-      'http://localhost:3000',
-    ].filter(Boolean),
+    // Mesma lista do CORS HTTP (inclui www) — evita que as duas divirjam
+    origin:  origensPermitidas,
     methods: ['GET', 'POST'],
   },
   transports:        ['websocket', 'polling'],

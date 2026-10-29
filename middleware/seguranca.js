@@ -184,6 +184,7 @@ function bloquearPayloadGrande(req, res, next) {
 }
 
 module.exports = {
+  origensPermitidas,
   corsConfig,
   helmetConfig,
   sanitizarBody,

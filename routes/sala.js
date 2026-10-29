@@ -8,13 +8,14 @@ const express  = require('express');
 const router   = express.Router();
 const { optionalAuth, requireAuth } = require('../middleware/auth');
 const { validarCriarSala, checarValidacao } = require('../middleware/seguranca');
+const { criaSala }                          = require('../middleware/rateLimit');
 const { criar, buscar, metricas, ping }     = require('../controllers/salaController');
 
 // Pública — visitante sem conta precisa verificar se a sala existe
 router.get('/ping', ping);
 router.get('/:id',  buscar);
 
-// Protegida — exige login (salas são ilimitadas para todos os planos)
-router.post('/', requireAuth, validarCriarSala, checarValidacao, criar);
+// Protegida — exige login, máx. 5 salas/hora por IP
+router.post('/', requireAuth, criaSala, validarCriarSala, checarValidacao, criar);
 
 module.exports = router;

@@ -91,18 +91,11 @@ function registrar(io, salas) {
     socket.on('entrar', async ({ salaId, nome, usuarioId }) => {
       if (!salaId || !nome) return;
 
-      let existe = await garantirSala(salas, salaId);
+      // Sala só nasce pelo POST /api/sala — código inventado não cria sala
+      const existe = await garantirSala(salas, salaId);
       if (!existe) {
-        salas[salaId] = {
-          id: salaId, nome: `Sala ${salaId}`,
-          donoId: usuarioId || null, donoSocketId: null,
-          sequencia: 'fibonacci', planoOwner: 'free',
-          participantes: {}, tarefas: [], tarefaAtiva: null,
-          votos: {}, revelado: false, historico: [],
-        };
-        await supabase.from('salas').insert({
-          id: salaId, nome: `Sala ${salaId}`, dono_id: usuarioId || null,
-        });
+        socket.emit('erro', { msg: 'Sala não encontrada. Confira o código ou o link.' });
+        return;
       }
 
       const sala = salas[salaId];

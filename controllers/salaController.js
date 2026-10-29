@@ -28,9 +28,16 @@ function calcularMetricas(sala) {
   };
 }
 
+// Teto de salas em memória — protege o servidor mesmo se o rate limit for burlado
+const MAX_SALAS = parseInt(process.env.MAX_SALAS || '500');
+
 // POST /api/sala — criar sala
 async function criar(req, res) {
   try {
+    if (Object.keys(_salas).length >= MAX_SALAS) {
+      return res.status(503).json({ erro: 'Muitas salas abertas no momento. Tente novamente em alguns minutos.' });
+    }
+
     const { nome }  = req.body;
     const donoId    = req.usuario?.id   || null;
     const donoNome  = req.usuario?.nome || null;
